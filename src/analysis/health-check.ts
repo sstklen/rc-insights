@@ -511,35 +511,41 @@ export async function runHealthCheck(
   if (llmClient) {
     const llmSpinner = ora("Generating AI-powered insights (LLM)...").start();
     try {
-      // 呼叫 LLM 取得增強建議
-      const analysisPrompt = buildAnalysisPrompt(llmContext);
-      const analysisResponse = await llmClient.generate(SYSTEM_PROMPT, analysisPrompt);
-      const parsedRecs = JSON.parse(analysisResponse.content);
-      if (parsedRecs.recommendations && Array.isArray(parsedRecs.recommendations)) {
-        llmRecommendations = parsedRecs.recommendations.map((r: Record<string, unknown>) => ({
-          ...r,
-          source: "llm" as const,
-        }));
+      // 三個 LLM 呼叫並行（各自獨立，不共享 rate limiter）
+      const [analysisRes, nextProductRes, agentRes] = await Promise.allSettled([
+        llmClient.generate(SYSTEM_PROMPT, buildAnalysisPrompt(llmContext)),
+        llmClient.generate(SYSTEM_PROMPT, buildNextProductPrompt(llmContext)),
+        llmClient.generate(SYSTEM_PROMPT, buildAgentPlanPrompt(llmContext)),
+      ]);
+
+      // 解析各結果（個別失敗不影響其他）
+      if (analysisRes.status === "fulfilled") {
+        const parsedRecs = JSON.parse(analysisRes.value.content);
+        if (parsedRecs.recommendations && Array.isArray(parsedRecs.recommendations)) {
+          llmRecommendations = parsedRecs.recommendations.map((r: Record<string, unknown>) => ({
+            ...r,
+            source: "llm" as const,
+          }));
+        }
       }
 
-      // 呼叫 LLM 取得下一個產品建議
-      const nextProductPrompt = buildNextProductPrompt(llmContext);
-      const nextProductResponse = await llmClient.generate(SYSTEM_PROMPT, nextProductPrompt);
-      const parsedNext = JSON.parse(nextProductResponse.content);
-      if (parsedNext.suggestions && Array.isArray(parsedNext.suggestions)) {
-        nextProductSuggestions = parsedNext.suggestions.map((s: Record<string, unknown>) => ({
-          ...s,
-          source: "llm" as const,
-        }));
+      if (nextProductRes.status === "fulfilled") {
+        const parsedNext = JSON.parse(nextProductRes.value.content);
+        if (parsedNext.suggestions && Array.isArray(parsedNext.suggestions)) {
+          nextProductSuggestions = parsedNext.suggestions.map((s: Record<string, unknown>) => ({
+            ...s,
+            source: "llm" as const,
+          }));
+        }
       }
 
-      // 呼叫 LLM 取得 Agent 行動計畫
-      const agentPrompt = buildAgentPlanPrompt(llmContext);
-      const agentResponse = await llmClient.generate(SYSTEM_PROMPT, agentPrompt);
-      const parsedAgent = JSON.parse(agentResponse.content);
-      agentPlan = { ...parsedAgent, source: "llm" as const };
+      if (agentRes.status === "fulfilled") {
+        const parsedAgent = JSON.parse(agentRes.value.content);
+        agentPlan = { ...parsedAgent, source: "llm" as const };
+      }
 
-      llmSpinner.succeed(`AI insights generated (${analysisResponse.provider}/${analysisResponse.model}, ${analysisResponse.tokensUsed} tokens)`);
+      const firstSuccess = analysisRes.status === "fulfilled" ? analysisRes.value : null;
+      llmSpinner.succeed(`AI insights generated${firstSuccess ? ` (${firstSuccess.provider}/${firstSuccess.model})` : ""}`);
     } catch (err) {
       llmSpinner.warn(`LLM analysis failed, using rule engine fallback: ${err instanceof Error ? err.message : String(err)}`);
       // Fallback: 用規則引擎

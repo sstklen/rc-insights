@@ -423,11 +423,19 @@ export async function startMonitor(options: MonitorOptions): Promise<void> {
   console.log("");
   console.log(chalk.gray(`  Next check in ${formatIntervalMs(intervalMs)}. Press Ctrl+C to stop.`));
 
-  setInterval(async () => {
+  const timer = setInterval(async () => {
     await runMonitorCycle(db, options.apiKey, options.projectId, alertSender);
     console.log("");
     console.log(chalk.gray(`  Next check in ${formatIntervalMs(intervalMs)}. Press Ctrl+C to stop.`));
   }, intervalMs);
+
+  // Graceful shutdown：清理 timer + 關閉 DB
+  process.on("SIGINT", () => {
+    clearInterval(timer);
+    db.close();
+    console.log(chalk.gray("\n  Monitor stopped. Database closed."));
+    process.exit(0);
+  });
 
   // 保持進程運行
   await new Promise(() => {
