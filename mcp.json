@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "rc-insights": {
+      "command": "bun",
+      "args": ["run", "src/index.ts", "mcp"],
+      "env": {}
+    }
+  }
+}

@@ -51,6 +51,16 @@ export interface ChartMeasure {
   decimal_precision: number;
 }
 
+/** 圖表分段資料 — segment 查詢時回傳的個別分段 */
+export interface ChartSegment {
+  /** 分段顯示名稱（例如 "brown noise", "Total"） */
+  display_name: string;
+  /** 分段識別碼 */
+  id: string;
+  /** 該分段的時間序列資料點 */
+  values: ChartValue[];
+}
+
 /** 圖表回應 — 來自 /charts/{chartName} 端點 */
 export interface ChartData {
   /** 圖表顯示名稱 */
@@ -67,10 +77,12 @@ export interface ChartData {
   end_date: number;
   /** 摘要統計 */
   summary: Record<string, Record<string, number>>;
-  /** 圖表資料點 */
+  /** 圖表資料點（無 segment 時使用） */
   values: ChartValue[];
   /** 量度定義陣列 */
   measures: ChartMeasure[];
+  /** 分段資料（有 segment 查詢時回傳，否則為 null 或不存在） */
+  segments?: ChartSegment[] | null;
 }
 
 /** 圖表選項回應 */
@@ -97,9 +109,11 @@ export interface Project {
   name: string;
 }
 
-/** 專案列表回應 */
+/** 專案列表回應（API 回傳的是 items 不是 projects） */
 export interface ProjectsResponse {
-  projects: Project[];
+  items: Project[];
+  next_page: string | null;
+  object: string;
 }
 
 /** 圖表查詢選項 */
@@ -110,6 +124,8 @@ export interface ChartQueryOptions {
   end_date?: string;
   /** 時間解析度 */
   resolution?: "day" | "week" | "month";
+  /** 分段維度，例如 "attribution_keyword", "offering_identifier", "product_duration" */
+  segment?: string;
 }
 
 /** 所有可用的圖表名稱 */
@@ -144,7 +160,9 @@ export type TrendDirection = "growing" | "stable" | "declining";
 
 /** 單一指標的健康評估結果 */
 export interface MetricHealth {
-  /** 指標名稱 */
+  /** 指標內部識別碼（例如 "churn", "mrr"） */
+  metricId: string;
+  /** 指標顯示名稱（來自 API 的 display_name） */
   name: string;
   /** 目前數值 */
   value: number;
@@ -190,6 +208,77 @@ export interface Recommendation {
   impact: "high" | "medium" | "low";
 }
 
+// ========================================
+// 關鍵字分析型別
+// ========================================
+
+/** 單一關鍵字的分析洞察 */
+export interface KeywordInsight {
+  /** 關鍵字名稱 */
+  keyword: string;
+  /** 總試用數 */
+  totalTrials: number;
+  /** 總營收 */
+  totalRevenue: number;
+  /** 平均轉換率（百分比），資料不可用時為 null */
+  avgConversionRate: number | null;
+  /** 效率等級 */
+  efficiency: "high" | "medium" | "low";
+  /** 文字建議 */
+  recommendation: string;
+}
+
+/** 關鍵字分析結果 */
+export interface KeywordAnalysisResult {
+  /** 按營收排序的關鍵字洞察 */
+  keywords: KeywordInsight[];
+  /** 營收最高的關鍵字 */
+  topKeyword: string;
+  /** 分析摘要敘述 */
+  narrative: string;
+  /** 是否有歸因資料（false 表示完全沒有關鍵字資料） */
+  hasAttributionData: boolean;
+}
+
+// ========================================
+// Offering/Paywall 分析型別
+// ========================================
+
+/** 單一 Offering 的分析洞察 */
+export interface OfferingInsight {
+  /** Offering 顯示名稱 */
+  offeringName: string;
+  /** Offering 識別碼 */
+  offeringId: string;
+  /** 試用開始數 */
+  trialStarts: number;
+  /** 轉換率（百分比），資料不可用時為 null */
+  conversionRate: number | null;
+  /** 營收 */
+  revenue: number;
+  /** 表現等級 */
+  performance: "top" | "average" | "below";
+}
+
+/** Offering 分析結果 */
+export interface OfferingAnalysisResult {
+  /** 按營收排序的 Offering 洞察 */
+  offerings: OfferingInsight[];
+  /** 表現最好的 Offering */
+  bestOffering: string;
+  /** 分析摘要敘述 */
+  narrative: string;
+}
+
+/** Quick Ratio 分析結果（由 quick-ratio.ts 計算） */
+export type { QuickRatioResult } from "../analysis/quick-ratio.ts";
+/** PMF Score 分析結果（由 pmf-score.ts 計算） */
+export type { PMFScoreResult } from "../analysis/pmf-score.ts";
+/** MRR 預測結果（由 mrr-forecast.ts 產生） */
+export type { MRRForecastResult } from "../analysis/mrr-forecast.ts";
+/** 場景分析結果（由 scenario-engine.ts 產生） */
+export type { ScenarioAnalysisResult } from "../analysis/scenario-engine.ts";
+
 /** 完整健康報告 */
 export interface HealthReport {
   /** 專案名稱 */
@@ -206,4 +295,149 @@ export interface HealthReport {
   anomalies: Anomaly[];
   /** 建議 */
   recommendations: Recommendation[];
+  /** 關鍵字歸因分析（額外 API 呼叫，可能為 undefined） */
+  keywordAnalysis?: KeywordAnalysisResult;
+  /** Offering/Paywall 實驗分析（額外 API 呼叫，可能為 undefined） */
+  offeringAnalysis?: OfferingAnalysisResult;
+  /** Quick Ratio 分析（需要 mrr_movement 圖表資料） */
+  quickRatio?: import("../analysis/quick-ratio.ts").QuickRatioResult;
+  /** PMF Score 分析（綜合多指標評分） */
+  pmfScore?: import("../analysis/pmf-score.ts").PMFScoreResult;
+  /** MRR 六個月預測（需要 12 個月歷史數據） */
+  mrrForecast?: import("../analysis/mrr-forecast.ts").MRRForecastResult;
+  /** What-if 場景分析 */
+  scenarios?: import("../analysis/scenario-engine.ts").ScenarioAnalysisResult;
+  /** LLM 增強建議（有 LLM API key 時可用） */
+  llmRecommendations?: LLMRecommendationResult[];
+  /** LLM 下一個產品建議 */
+  nextProductSuggestions?: NextProductSuggestion[];
+  /** LLM Agent 行動計畫 */
+  agentPlan?: AgentPlanResult;
+  /** 飛輪分析結果 */
+  flywheel?: FlywheelResult;
+  /** Executive Summary（報告最上面的關鍵提煉） */
+  executiveSummary?: import("../analysis/executive-summary.ts").ExecutiveSummary;
+}
+
+/** LLM 增強建議 */
+export interface LLMRecommendationResult {
+  priority: number;
+  title: string;
+  description: string;
+  actionSteps: string[];
+  expectedImpact: string;
+  timeToImplement: string;
+  confidence: "high" | "medium" | "low";
+  relatedMetric: string;
+  source: "llm" | "rule_engine";
+}
+
+/** 下一個產品建議 */
+export interface NextProductSuggestion {
+  direction: "vertical" | "horizontal" | "adjacent";
+  directionLabel: string;
+  title: string;
+  rationale: string;
+  dataEvidence: string[];
+  score: number;
+  implementationComplexity: "low" | "medium" | "high";
+  source: "llm" | "rule_engine";
+}
+
+// ========================================
+// Flywheel（飛輪）型別
+// ========================================
+
+/** 飛輪單一洞察 */
+export interface FlywheelInsight {
+  /** 飛輪層級：1-4 */
+  layer: 1 | 2 | 3 | 4;
+  /** 層級名稱 */
+  layerName: "Your Data" | "Peer Comparison" | "Category Intelligence" | "Market Opportunity";
+  /** 洞察標題 */
+  title: string;
+  /** 洞察說明 */
+  description: string;
+  /** 連結到 RevenueCat Dashboard 的 URL */
+  actionUrl?: string;
+  /** MCP Server 可執行的動作識別碼 */
+  mcpAction?: string;
+  /** 是否需要付費解鎖 */
+  isPremium: boolean;
+  /** 預估價值說明 */
+  estimatedValue: string;
+}
+
+/** 飛輪分析結果 */
+export interface FlywheelResult {
+  /** 所有飛輪洞察 */
+  insights: FlywheelInsight[];
+  /** 用戶目前所在層級 */
+  currentLayer: number;
+  /** 引導升級的文字 */
+  nextLayerTeaser: string;
+  /** 飛輪整體敘事 */
+  flyWheelNarrative: string;
+}
+
+// ========================================
+// Monitor（監控）型別
+// ========================================
+
+/** 警報類型 */
+export type AlertChannel = "slack" | "email" | "terminal";
+
+/** 監控警報 */
+export interface MonitorAlert {
+  /** 警報等級 */
+  severity: "critical" | "warning" | "info";
+  /** 觸發指標 */
+  metric: string;
+  /** 警報訊息 */
+  message: string;
+  /** 前次值 */
+  previousValue: number;
+  /** 目前值 */
+  currentValue: number;
+  /** 變動百分比 */
+  changePercent: number;
+  /** 觸發時間 */
+  triggeredAt: string;
+}
+
+/** 監控快照（存入 SQLite） */
+export interface MonitorSnapshot {
+  /** 快照 ID */
+  id?: number;
+  /** 專案 ID */
+  projectId: string;
+  /** 快照時間 */
+  timestamp: string;
+  /** MRR 值 */
+  mrr: number;
+  /** Churn Rate */
+  churnRate: number;
+  /** Quick Ratio */
+  quickRatio: number;
+  /** 異常數量 */
+  anomalyCount: number;
+  /** 完整報告 JSON */
+  reportJson: string;
+}
+
+/** Agent 行動計畫 */
+export interface AgentPlanResult {
+  summary: string;
+  actions: Array<{
+    id: number;
+    type: string;
+    description: string;
+    mcpTool: string;
+    mcpParams: Record<string, unknown>;
+    expectedImpact: string;
+    priority: string;
+  }>;
+  estimatedMRRImpact: string;
+  disclaimer: string;
+  source: "llm" | "rule_engine";
 }

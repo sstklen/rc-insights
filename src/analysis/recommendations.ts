@@ -16,28 +16,28 @@ const RECOMMENDATION_TEMPLATES: Record<
   trial_conversion_rate: {
     green: (m) => ({
       priority: 3,
-      title: "試用轉換表現優異 — 加大獲客投入",
-      description: `你的試用轉換率 ${m.value.toFixed(1)}% 超過 ${
+      title: "Strong trial conversion — invest in acquisition",
+      description: `Your trial conversion rate of ${m.value.toFixed(1)}% exceeds ${
         m.value >= (BENCHMARKS["trial_conversion_rate"]?.topQuartile ?? 55) ? "75%" : "50%"
-      } 的 app。建議加大試用獲客投入（廣告、ASO），因為你的轉換漏斗已經很健康。`,
+      } of apps. Consider scaling acquisition (ads, ASO) since your conversion funnel is already healthy.`,
       relatedMetric: "trial_conversion_rate",
       impact: "high",
     }),
     yellow: (m) => ({
       priority: 2,
-      title: "試用轉換率有提升空間",
-      description: `試用轉換率 ${m.value.toFixed(1)}% 略低於中位數 ${
+      title: "Trial conversion has room for improvement",
+      description: `Trial conversion rate of ${m.value.toFixed(1)}% is below the median of ${
         BENCHMARKS["trial_conversion_rate"]?.median ?? 35
-      }%。建議：(1) 優化 onboarding 流程，(2) 在試用期間發送推播提醒價值亮點，(3) 考慮調整試用天數。SOSA 2026 指出 ${KEY_FACTS.day0TrialCancelRate}% 的 3 天試用取消發生在 Day 0。`,
+      }%. Suggestions: (1) Optimize the onboarding flow, (2) Send push notifications highlighting value during the trial, (3) Consider adjusting trial length. SOSA 2026 reports that ${KEY_FACTS.day0TrialCancelRate}% of 3-day trial cancellations happen on Day 0.`,
       relatedMetric: "trial_conversion_rate",
       impact: "high",
     }),
     red: (m) => ({
       priority: 1,
-      title: "試用轉換率偏低 — 需要立即改善",
-      description: `試用轉換率僅 ${m.value.toFixed(1)}%，遠低於中位數 ${
+      title: "Trial conversion critically low — immediate action needed",
+      description: `Trial conversion rate is only ${m.value.toFixed(1)}%, well below the median of ${
         BENCHMARKS["trial_conversion_rate"]?.median ?? 35
-      }%。這是最影響收入的指標。建議：(1) 審視試用 onboarding 是否展示核心價值，(2) 檢查定價策略，(3) 考慮 A/B 測試不同試用期長度，(4) 加入 paywall 前的免費功能體驗。`,
+      }%. This is the highest-leverage metric for revenue. Suggestions: (1) Audit whether the trial onboarding showcases core value, (2) Review pricing strategy, (3) A/B test different trial durations, (4) Add free feature access before the paywall.`,
       relatedMetric: "trial_conversion_rate",
       impact: "high",
     }),
@@ -46,24 +46,24 @@ const RECOMMENDATION_TEMPLATES: Record<
   churn: {
     green: (m) => ({
       priority: 4,
-      title: "流失控制良好",
-      description: `月流失率 ${m.value.toFixed(1)}% 表現優異。建議持續監控並維持目前策略。可考慮推動更多用戶轉為年訂閱以進一步降低流失。`,
+      title: "Churn is well-controlled",
+      description: `Monthly churn rate of ${m.value.toFixed(1)}% is excellent. Maintain current retention strategies. Consider pushing more users toward annual plans to further reduce churn.`,
       relatedMetric: "churn",
       impact: "low",
     }),
     yellow: (m) => ({
       priority: 2,
-      title: "流失率略高 — 考慮留存策略",
-      description: `月流失率 ${m.value.toFixed(1)}% 高於健康水準 5%。建議：(1) 在訂閱到期前 3-5 天發送續訂提醒，(2) 對即將流失的用戶提供折扣挽回方案，(3) 分析取消原因找出共通模式。`,
+      title: "Churn slightly elevated — consider retention strategies",
+      description: `Monthly churn rate of ${m.value.toFixed(1)}% is above the healthy threshold of 5%. Suggestions: (1) Send renewal reminders 3-5 days before expiry, (2) Offer discount win-back flows to at-risk users, (3) Analyze cancellation reasons for common patterns.`,
       relatedMetric: "churn",
       impact: "medium",
     }),
     red: (m) => ({
       priority: 1,
-      title: "流失率過高 — 緊急處理",
-      description: `月流失率 ${m.value.toFixed(1)}% 超過警戒線 ${
+      title: "Churn rate critical — urgent action required",
+      description: `Monthly churn rate of ${m.value.toFixed(1)}% exceeds the warning threshold of ${
         BENCHMARKS["churn"]?.bottomQuartile ?? 8
-      }%。建議立即：(1) 調查取消原因（加入取消流程問卷），(2) 實施 win-back 優惠，(3) 檢查是否有 billing issue 導致非自願流失，(4) 考慮推出年訂閱優惠。`,
+      }%. Immediate actions: (1) Add a cancellation survey to identify root causes, (2) Implement win-back offers, (3) Check for billing issues causing involuntary churn, (4) Consider annual subscription discounts.`,
       relatedMetric: "churn",
       impact: "high",
     }),
@@ -72,24 +72,24 @@ const RECOMMENDATION_TEMPLATES: Record<
   refund_rate: {
     green: (m) => ({
       priority: 5,
-      title: "退款率健康",
-      description: `退款率 ${m.value.toFixed(1)}% 遠低於中位數 ${
+      title: "Refund rate is healthy",
+      description: `Refund rate of ${m.value.toFixed(1)}% is well below the median of ${
         BENCHMARKS["refund_rate"]?.median ?? 3
-      }%，表示用戶滿意度高。`,
+      }%, indicating strong user satisfaction.`,
       relatedMetric: "refund_rate",
       impact: "low",
     }),
     yellow: (m) => ({
       priority: 3,
-      title: "退款率接近警戒",
-      description: `退款率 ${m.value.toFixed(1)}% 接近中位數。建議檢查：(1) 試用條款是否清晰，(2) 定價頁面是否有誤導，(3) 是否有地區性異常退款模式。`,
+      title: "Refund rate approaching warning level",
+      description: `Refund rate of ${m.value.toFixed(1)}% is near the median. Review: (1) Whether trial terms are clearly communicated, (2) Whether the pricing page is misleading, (3) Whether there are region-specific refund patterns.`,
       relatedMetric: "refund_rate",
       impact: "medium",
     }),
     red: (m) => ({
       priority: 1,
-      title: "退款率過高 — 可能觸發平台審查",
-      description: `退款率 ${m.value.toFixed(1)}% 偏高。過高退款率可能導致 App Store/Play Store 審查。建議：(1) 改善購買前的功能說明，(2) 確保試用轉付費有明確提示，(3) 加強客服回應速度。`,
+      title: "Refund rate too high — potential store review risk",
+      description: `Refund rate of ${m.value.toFixed(1)}% is elevated. High refund rates may trigger App Store/Play Store reviews. Suggestions: (1) Improve pre-purchase feature descriptions, (2) Ensure trial-to-paid transition has clear prompts, (3) Improve customer support response times.`,
       relatedMetric: "refund_rate",
       impact: "high",
     }),
@@ -98,26 +98,26 @@ const RECOMMENDATION_TEMPLATES: Record<
   mrr: {
     green: (m) => ({
       priority: 4,
-      title: "MRR 表現穩健",
-      description: `MRR $${m.value.toLocaleString()} ${
+      title: "MRR performing well",
+      description: `MRR of $${m.value.toLocaleString()} ${
         m.value >= (BENCHMARKS["mrr"]?.topQuartile ?? 10_000)
-          ? `已進入前 ${KEY_FACTS.appsReaching10kMRR}% 的 app 行列`
-          : "高於中位數"
-      }。${m.trend === "growing" ? "而且持續成長中，趨勢良好。" : "建議持續投資成長。"}`,
+          ? `places you in the top ${KEY_FACTS.appsReaching10kMRR}% of apps`
+          : "is above the median"
+      }. ${m.trend === "growing" ? "Growth trend is positive — keep investing." : "Consider investing in growth."}`,
       relatedMetric: "mrr",
       impact: "low",
     }),
     yellow: (m) => ({
       priority: 3,
-      title: "MRR 有成長空間",
-      description: `MRR $${m.value.toLocaleString()} 尚未達到中位數水準。關鍵槓桿：(1) 提升試用轉換率，(2) 降低流失率，(3) 提升 ARPU（例如推出更高價方案或年訂閱）。`,
+      title: "MRR has growth potential",
+      description: `MRR of $${m.value.toLocaleString()} hasn't reached the median yet. Key levers: (1) Improve trial conversion, (2) Reduce churn, (3) Increase ARPU (e.g., higher-tier plans or annual subscriptions).`,
       relatedMetric: "mrr",
       impact: "medium",
     }),
     red: (m) => ({
       priority: 2,
-      title: "MRR 偏低 — 需要成長策略",
-      description: `MRR $${m.value.toLocaleString()} 低於大多數 app。建議聚焦在最高槓桿的指標改善，通常是試用轉換率和流失率。`,
+      title: "MRR below benchmark — growth strategy needed",
+      description: `MRR of $${m.value.toLocaleString()} is below most apps. Focus on the highest-leverage improvements, typically trial conversion and churn reduction.`,
       relatedMetric: "mrr",
       impact: "medium",
     }),
@@ -126,22 +126,22 @@ const RECOMMENDATION_TEMPLATES: Record<
   ltv_per_customer: {
     green: (m) => ({
       priority: 5,
-      title: "LTV 表現良好",
-      description: `每客戶 LTV $${m.value.toFixed(2)} 表現良好。可考慮加大付費獲客（CAC）預算，因為 LTV 支撐得住。`,
+      title: "LTV looking strong",
+      description: `LTV per customer of $${m.value.toFixed(2)} is healthy. Consider scaling paid acquisition (CAC) since your LTV can support it.`,
       relatedMetric: "ltv_per_customer",
       impact: "low",
     }),
     yellow: (m) => ({
       priority: 3,
-      title: "LTV 可進一步提升",
-      description: `每客戶 LTV $${m.value.toFixed(2)}。建議：(1) 推出年訂閱方案提升 LTV，(2) 加入加值功能提升 ARPU，(3) 改善留存以延長訂閱時長。`,
+      title: "LTV could be improved",
+      description: `LTV per customer of $${m.value.toFixed(2)} has room to grow. Suggestions: (1) Introduce annual plans to boost LTV, (2) Add premium features to increase ARPU, (3) Improve retention to extend subscription lifetimes.`,
       relatedMetric: "ltv_per_customer",
       impact: "medium",
     }),
     red: (m) => ({
       priority: 2,
-      title: "LTV 偏低 — 限制獲客投資",
-      description: `每客戶 LTV 僅 $${m.value.toFixed(2)}，較低的 LTV 限制了你能投入的獲客成本。建議先改善留存和轉換率，再加大獲客投入。`,
+      title: "LTV too low — limits acquisition investment",
+      description: `LTV per customer is only $${m.value.toFixed(2)}. Low LTV constrains how much you can invest in acquisition. Prioritize improving retention and conversion before scaling acquisition spend.`,
       relatedMetric: "ltv_per_customer",
       impact: "medium",
     }),
@@ -160,9 +160,9 @@ export function generateRecommendations(
 ): Recommendation[] {
   const recommendations: Recommendation[] = [];
 
-  // 根據每個指標的健康狀態產生對應建議
+  // 根據每個指標的健康狀態產生對應建議（使用 metricId 查找模板）
   for (const metric of metrics) {
-    const templates = RECOMMENDATION_TEMPLATES[metric.name];
+    const templates = RECOMMENDATION_TEMPLATES[metric.metricId];
     if (!templates) continue;
 
     const generator = templates[metric.status];
@@ -179,8 +179,8 @@ export function generateRecommendations(
     if (anomaly.type === "spike" && anomaly.magnitude > 20) {
       recommendations.push({
         priority: 3,
-        title: `${anomaly.metric} 出現異常飆升`,
-        description: `${anomaly.date} 偵測到 ${anomaly.metric} 飆升 ${anomaly.magnitude.toFixed(1)}%。${anomaly.description} 建議調查原因，如果是正面因素（如行銷活動成功），考慮複製此策略。`,
+        title: `Unusual spike in ${anomaly.metric}`,
+        description: `${anomaly.metric} spiked ${anomaly.magnitude.toFixed(1)}% on ${anomaly.date}. If this was caused by a positive factor (e.g., successful marketing campaign), consider replicating the strategy.`,
         relatedMetric: anomaly.metric,
         impact: "medium",
       });
@@ -189,8 +189,8 @@ export function generateRecommendations(
     if (anomaly.type === "drop" && anomaly.magnitude > 20) {
       recommendations.push({
         priority: 1,
-        title: `${anomaly.metric} 出現異常下跌`,
-        description: `${anomaly.date} 偵測到 ${anomaly.metric} 下跌 ${anomaly.magnitude.toFixed(1)}%。${anomaly.description} 建議立即調查是否有技術問題、定價變更或市場因素。`,
+        title: `Unusual drop in ${anomaly.metric}`,
+        description: `${anomaly.metric} dropped ${anomaly.magnitude.toFixed(1)}% on ${anomaly.date}. Investigate immediately for potential technical issues, pricing changes, or market factors.`,
         relatedMetric: anomaly.metric,
         impact: "high",
       });

@@ -30,7 +30,7 @@ export class RevenueCatAPIError extends Error {
     public statusText: string,
     public body: string,
   ) {
-    super(`RevenueCat API 錯誤 [${statusCode}]: ${statusText}`);
+    super(`RevenueCat API error [${statusCode}]: ${statusText}`);
     this.name = "RevenueCatAPIError";
   }
 }
@@ -43,7 +43,7 @@ export class RevenueCatClient {
 
   constructor(apiKey: string) {
     if (!apiKey || apiKey.trim() === "") {
-      throw new Error("API key 不可為空。請透過 --api-key 參數傳入你的 RevenueCat v2 API key。");
+      throw new Error("API key cannot be empty. Please provide your RevenueCat v2 API key via --api-key.");
     }
     this.apiKey = apiKey.trim();
   }
@@ -58,13 +58,13 @@ export class RevenueCatClient {
 
     if (elapsed < MIN_INTERVAL_MS) {
       const waitTime = MIN_INTERVAL_MS - elapsed;
-      logger.debug(`速率限制：等待 ${waitTime}ms`);
+      logger.debug(`Rate limit: waiting ${waitTime}ms`);
       await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
 
     this.lastRequestTime = Date.now();
     this.requestCount++;
-    logger.debug(`API 請求 #${this.requestCount}`);
+    logger.debug(`API request #${this.requestCount}`);
   }
 
   /**
@@ -97,7 +97,7 @@ export class RevenueCatClient {
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
       const waitSeconds = retryAfter ? parseInt(retryAfter, 10) : 60;
-      logger.warn(`觸發速率限制，等待 ${waitSeconds} 秒後重試...`);
+      logger.warn(`Rate limited, retrying after ${waitSeconds} seconds...`);
       await new Promise((resolve) => setTimeout(resolve, waitSeconds * 1000));
       return this.request<T>(path, params);
     }
@@ -117,7 +117,7 @@ export class RevenueCatClient {
    */
   async getProjects(): Promise<Project[]> {
     const response = await this.request<ProjectsResponse>("/projects");
-    return response.projects;
+    return response.items;
   }
 
   /**
@@ -150,6 +150,9 @@ export class RevenueCatClient {
     if (options?.resolution) {
       params["resolution"] = options.resolution;
     }
+    if (options?.segment) {
+      params["segment"] = options.segment;
+    }
 
     return this.request<ChartData>(`/projects/${projectId}/charts/${chartName}`, params);
   }
@@ -180,10 +183,10 @@ export class RevenueCatClient {
       try {
         const data = await this.getChart(projectId, name, options);
         results.set(name, data);
-        logger.debug(`成功取得圖表: ${name}`);
+        logger.debug(`Chart fetched: ${name}`);
       } catch (err) {
         // 單一圖表失敗不影響其他圖表
-        logger.warn(`取得圖表 ${name} 失敗: ${err instanceof Error ? err.message : String(err)}`);
+        logger.warn(`Failed to fetch chart ${name}: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
 

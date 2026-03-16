@@ -1,0 +1,14 @@
+{
+  "project": "rc-insights",
+  "current_phase": "Phase 5",
+  "current_card": "CARD-08",
+  "last_accepted_card": "CARD-07",
+  "blocked_cards": [],
+  "next_card": "CARD-08",
+  "last_commit": null,
+  "total_cards": 8,
+  "accepted_count": 7,
+  "open_questions": 0,
+  "updated_at": "2026-03-17T01:10:00Z",
+  "notes": "CARD-01~07 all done. CARD-08 (git commit + GitHub publish) pending tkman approval."
+}
