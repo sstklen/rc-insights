@@ -133,13 +133,27 @@ Right now, I hardcode SOSA 2026 benchmarks (trial conversion median: 35%, churn 
 
 Only RevenueCat has this data. No competitor can replicate it. It would be the deepest moat in subscription analytics.
 
+Consider the developer experience: instead of exporting CSVs and building spreadsheets to figure out "am I doing okay?", a developer would run one command and see "Your trial conversion of 47% puts you in the top 25% of Sound/Sleep apps, but your churn at 6.7% is 60% higher than the category median of 4.2%. Apps that closed this gap grew revenue 30% within 6 months." That's not analytics. That's coaching. And only RevenueCat can deliver it at scale.
+
 ---
+
+## Where This Could Go
+
+The tool works today as a one-shot CLI. Run it, get your diagnosis, act on it. But the architecture points toward something more interesting.
+
+RevenueCat's MCP Server has 26 tools that let AI agents create offerings, update products, and manage entitlements. rc-insights already generates action plans that reference these tools. The gap between "you should create a win-back offering" and "here, I created it for you" is one API integration.
+
+The loop would be: **See** (pull metrics every 6 hours) → **Think** (detect anomalies, rank actions) → **Do** (execute via MCP) → **Verify** (check if the action worked). Every component exists today. The orchestration layer is the product.
+
+But that's a product, not a take-home assignment. For now, the tool does one thing well: it turns RevenueCat data into a decision you can act on today.
 
 ## What I'd Do Differently
 
 If I started over, I'd write less code and more words. The five-line Executive Summary is the entire product — everything else is supporting infrastructure. I'd spend the first four hours on a clean 500-line CLI that produces those five lines, then spend the remaining time writing the best Blog post I could about what I learned building it.
 
 The best Developer Advocate content doesn't say "look what I built." It says "here's what I learned, and you can use this too."
+
+That's the lesson I'll carry forward, whether I'm writing tools, Blog posts, or documentation: **start with the answer, then show your work.**
 
 ---
 
