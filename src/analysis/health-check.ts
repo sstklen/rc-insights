@@ -539,11 +539,39 @@ export async function runHealthCheck(
         agentPlan = { ...parsedAgent, source: "llm" as const };
       }
 
-      const firstSuccess = analysisRes.status === "fulfilled" ? analysisRes.value : null;
-      llmSpinner.succeed(`AI insights generated${firstSuccess ? ` (${firstSuccess.provider}/${firstSuccess.model})` : ""}`);
+      // 檢查是否全部失敗 → 觸發 fallback
+      const allFailed = analysisRes.status === "rejected"
+        && nextProductRes.status === "rejected"
+        && agentRes.status === "rejected";
+
+      if (allFailed) {
+        // 全部 LLM 呼叫都失敗，退回規則引擎
+        const reason = analysisRes.status === "rejected" ? analysisRes.reason : "unknown";
+        llmSpinner.warn(`LLM analysis failed, using rule engine fallback: ${reason instanceof Error ? reason.message : String(reason)}`);
+        llmRecommendations = recommendations.map(convertToEnhanced);
+        nextProductSuggestions = generateFallbackNextProduct(llmContext).map((s) => ({
+          ...s,
+          source: "rule_engine" as const,
+        }));
+      } else {
+        // 至少有一個成功
+        const firstSuccess = analysisRes.status === "fulfilled" ? analysisRes.value : null;
+        llmSpinner.succeed(`AI insights generated${firstSuccess ? ` (${firstSuccess.provider}/${firstSuccess.model})` : ""}`);
+
+        // 個別失敗的用 fallback 補齊
+        if (!llmRecommendations) {
+          llmRecommendations = recommendations.map(convertToEnhanced);
+        }
+        if (!nextProductSuggestions) {
+          nextProductSuggestions = generateFallbackNextProduct(llmContext).map((s) => ({
+            ...s,
+            source: "rule_engine" as const,
+          }));
+        }
+      }
     } catch (err) {
-      llmSpinner.warn(`LLM analysis failed, using rule engine fallback: ${err instanceof Error ? err.message : String(err)}`);
-      // Fallback: 用規則引擎
+      // JSON.parse 等非網路錯誤
+      llmSpinner.warn(`LLM analysis error, using rule engine fallback: ${err instanceof Error ? err.message : String(err)}`);
       llmRecommendations = recommendations.map(convertToEnhanced);
       nextProductSuggestions = generateFallbackNextProduct(llmContext).map((s) => ({
         ...s,

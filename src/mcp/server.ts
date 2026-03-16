@@ -8,6 +8,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod/v3";
 import { runHealthCheck } from "../analysis/health-check.ts";
 import type { HealthReport } from "../api/types.ts";
+import { setLocale } from "../i18n/index.ts";
+import type { Locale } from "../i18n/index.ts";
 
 /** 版本號（與 CLI 同步） */
 const VERSION = "1.0.0";
@@ -41,10 +43,9 @@ async function getReport(apiKey: string, projectId?: string): Promise<HealthRepo
     return cached.report;
   }
 
-  // 禁用 ora spinner（MCP Server 的 stdout 是 JSON-RPC 通道，不能有 spinner 輸出）
-  // 設定環境變數讓 ora 自動禁用
-  const prevCI = process.env["CI"];
-  process.env["CI"] = "true";
+  // 禁用 ora spinner — 在 MCP 啟動時一次性設定，而非每次呼叫都改
+  // （避免併發競態：多個 request 同時改 process.env）
+  // 注意：process.env.CI 在 startMCPServer() 中已設為 "true"
 
   try {
     const report = await runHealthCheck(apiKey, projectId);
@@ -64,13 +65,8 @@ async function getReport(apiKey: string, projectId?: string): Promise<HealthRepo
     }
 
     return report;
-  } finally {
-    // 復原環境變數
-    if (prevCI === undefined) {
-      delete process.env["CI"];
-    } else {
-      process.env["CI"] = prevCI;
-    }
+  } catch (err) {
+    throw err;
   }
 }
 
@@ -144,6 +140,10 @@ export async function startMCPServer(): Promise<void> {
     },
   });
 
+  // MCP Server 生命週期內一次性禁用 ora spinner
+  // （stdout 是 JSON-RPC 通道，spinner 輸出會污染協議）
+  process.env["CI"] = "true";
+
   // ----------------------------------
   // Tool 1: 完整健康分析
   // ----------------------------------
@@ -153,6 +153,10 @@ export async function startMCPServer(): Promise<void> {
     analyzeInputSchema,
     async (args) => {
       try {
+        // 設定語系（如果有指定）
+        if (args.lang) {
+          setLocale(args.lang as Locale);
+        }
         const report = await getReport(args.apiKey, args.projectId);
 
         const result = {
