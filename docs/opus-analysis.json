@@ -1,0 +1,80 @@
+{
+  "model": "claude-opus-4.6",
+  "source": "direct-reasoning",
+  "latency_ms": 0,
+  "tokens": 0,
+  "cost": 0,
+  "recommendations": [
+    {
+      "priority": 1,
+      "title": "Shift to Annual-First Pricing Architecture",
+      "description": "Dark Noise's Quick Ratio of 1.05 means monthly subscribers are churning at nearly the same rate they're acquired. The root cause: a white noise app delivers 100% of its value on Day 1. Monthly subscribers re-evaluate every 30 days with no new reason to stay. Annual pricing bypasses 11 monthly churn decision points. SOSA 2026 data shows annual subscribers churn at 1/3 the rate of monthly.",
+      "actionSteps": [
+        "Make the annual plan ($19.99/yr = $1.67/mo) the default/prominent option on all paywalls",
+        "Position monthly ($2.99/mo = $35.88/yr) as the 'expensive' option — anchor effect",
+        "Create an 'annual upgrade' Offering via MCP for existing monthly users: 2 months free if they switch now",
+        "Remove monthly option from the default Offering for new users (still available but requires extra tap)"
+      ],
+      "expectedImpact": "+$800-1,200 MRR within 6 months (from reduced effective churn + higher commitment)",
+      "confidence": "high",
+      "reasoning": "At 2,537 active subs, shifting just 30% from monthly to annual reduces effective monthly churn from 6.7% to ~4.2%. That compounds to +$800/month within 6 months. This is the single highest-ROI move because it requires zero product changes."
+    },
+    {
+      "priority": 2,
+      "title": "Build Cumulative Value Through Sleep Data",
+      "description": "The fundamental problem: Dark Noise is a utility, not a habit. Users can switch to any competitor with zero switching cost. The fix: track and visualize sleep patterns, favorite sounds, listening history. After 3 months of data, leaving means losing your sleep insights. This creates organic retention that no discount or push notification can replicate.",
+      "actionSteps": [
+        "Add a 'Sleep Insights' dashboard showing listening patterns, most-used sounds, streak data",
+        "Store data only for subscribers (free tier gets basic playback, no history)",
+        "After 30 days, show a '1 Month of Sleep Data' milestone notification",
+        "At renewal decision point, show 'You have 90 days of sleep data. Cancelling means losing your history.'"
+      ],
+      "expectedImpact": "+$400-700 MRR within 9 months (from improved Month 3-6 retention)",
+      "confidence": "medium",
+      "reasoning": "Requires product development (weeks, not days). But addresses the structural problem: no switching cost. Apps with cumulative data (Spotify, Strava) have 2-3x better retention than pure utility apps."
+    },
+    {
+      "priority": 3,
+      "title": "Enter Baby Sleep Market (Adjacent Vertical)",
+      "description": "Dark Noise's trial conversion of 47.4% proves the product works. But the white noise market is approaching saturation (QR=1.05, flat MRR). Baby sleep is an adjacent vertical with 3x higher willingness to pay (parents will pay anything for their baby to sleep), growing search volume, and natural word-of-mouth among parent groups. The audio engine already exists.",
+      "actionSteps": [
+        "Create a 'Dark Noise Baby' or 'Lullaby' section within the existing app (not a new app)",
+        "Add 5-10 baby-specific sounds (heartbeat, shushing, womb sounds)",
+        "Price at $4.99/mo or $39.99/yr (parents expect to pay more for baby products)",
+        "Create a separate Offering via MCP targeting the baby sleep segment",
+        "ASO: target 'baby sleep sounds', 'white noise baby', 'infant sleep app' keywords"
+      ],
+      "expectedImpact": "+$1,500-3,000 MRR within 12 months (new market segment at higher ARPU)",
+      "confidence": "medium",
+      "reasoning": "Dark Noise has the tech (audio engine) and the conversion funnel (47.4%). The constraint is market size, not product. Baby sleep is 3-5x larger market with 2x ARPU. This is the 'jump to adjacent market' play."
+    },
+    {
+      "priority": 4,
+      "title": "Fix Involuntary Churn (Quick Win)",
+      "description": "SOSA 2026 reports involuntary churn (failed payments) is typically 20-40% of total churn for subscription apps. If Dark Noise's 6.7% churn has a 30% involuntary component, that's 2% monthly churn that's fixable with zero product changes — just payment recovery.",
+      "actionSteps": [
+        "Check Subscription Status chart for 'Billing Issue' count in RevenueCat Dashboard",
+        "Enable RevenueCat's grace period (gives users extra days after payment failure)",
+        "If >1% of subs have billing issues: implement dunning emails (3-step: gentle reminder → urgent → last chance)",
+        "Track recovery rate via Charts API subscription_status segment"
+      ],
+      "expectedImpact": "+$150-300 MRR within 1 month (immediate recovery of failed payments)",
+      "confidence": "high",
+      "reasoning": "This is the lowest-hanging fruit. No product changes, no pricing changes, just payment recovery. If 2% of the 6.7% churn is involuntary, fixing it adds $150-300/month immediately."
+    },
+    {
+      "priority": 5,
+      "title": "Leverage January Spike Pattern for Seasonal Campaigns",
+      "description": "The data shows a clear January revenue spike (+41.4%) followed by February drop (-36.2%). This is likely New Year's resolution behavior. Instead of treating this as an anomaly, build a deliberate seasonal strategy around it.",
+      "actionSteps": [
+        "Create a 'New Year, Better Sleep' annual plan Offering that launches Dec 26 every year",
+        "Price it at 40% off annual (limited time) to lock in January adopters for 12 months",
+        "Run Apple Search Ads campaign Dec 15 - Jan 31 targeting 'sleep better', 'new year health'",
+        "Track via keyword attribution segment in Charts API"
+      ],
+      "expectedImpact": "+$500-1,000 MRR annually (concentrated in Q1, but retained all year via annual pricing)",
+      "confidence": "medium",
+      "reasoning": "The January spike is already happening organically. Converting those seasonal users to annual plans (vs monthly) means they stay for 12 months instead of churning in February. This turns a seasonal pattern into structural growth."
+    }
+  ]
+}

@@ -47,3 +47,4 @@ bun.lockb
 # CLAUDE.md（bun init 自動產生的，非本專案文件）
 CLAUDE.md
 .cursor/
+.env
