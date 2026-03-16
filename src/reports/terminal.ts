@@ -20,7 +20,7 @@ import type { QuickRatioResult } from "../analysis/quick-ratio.ts";
 import type { PMFScoreResult } from "../analysis/pmf-score.ts";
 import type { MRRForecastResult } from "../analysis/mrr-forecast.ts";
 import type { ScenarioAnalysisResult } from "../analysis/scenario-engine.ts";
-import { formatCurrency, formatPercent, formatNumber, formatChange } from "../utils/formatting.ts";
+import { formatCurrency, formatPercent, formatNumber, formatChange, formatByUnit } from "../utils/formatting.ts";
 import { t, tMetric, tTrend, tQRGrade, tPMFGrade } from "../i18n/index.ts";
 
 /** 健康狀態對應的圖示 */
@@ -39,22 +39,6 @@ function impactColor(impact: string): (text: string) => string {
       return chalk.yellow;
     default:
       return chalk.gray;
-  }
-}
-
-/**
- * 根據單位格式化數值
- */
-function formatMetricValue(value: number, unit: string): string {
-  switch (unit) {
-    case "$":
-      return formatCurrency(value);
-    case "%":
-      return formatPercent(value);
-    case "#":
-      return formatNumber(value);
-    default:
-      return value.toLocaleString("en-US");
   }
 }
 
@@ -104,7 +88,7 @@ function renderMetricsTable(metrics: MetricHealth[]): string {
     const icon = STATUS_ICON[metric.status] ?? "⚪";
     // 優先使用 i18n 翻譯名稱，fallback 到 API 顯示名稱
     const name = tMetric(metric.metricId, metric.name).padEnd(16);
-    const value = formatMetricValue(metric.value, metric.unit).padStart(10);
+    const value = formatByUnit(metric.value, metric.unit).padStart(10);
     const trend = tTrend(metric.trend);
     const change = metric.changePercent !== 0 ? ` (${formatChange(metric.changePercent)} ${t("misc.mom")})` : "";
 
@@ -123,7 +107,7 @@ function renderMetricsTable(metrics: MetricHealth[]): string {
     // 基準比較
     const benchmarkNote =
       metric.benchmark > 0
-        ? chalk.gray(` (${t("misc.benchmark_label")}: ${formatMetricValue(metric.benchmark, metric.unit)})`)
+        ? chalk.gray(` (${t("misc.benchmark_label")}: ${formatByUnit(metric.benchmark, metric.unit)})`)
         : "";
 
     lines.push(`  ${icon} ${chalk.white(name)} ${chalk.bold(value)}  ${trendColored}${benchmarkNote}`);

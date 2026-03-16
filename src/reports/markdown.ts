@@ -17,7 +17,7 @@ import type { QuickRatioResult } from "../analysis/quick-ratio.ts";
 import type { PMFScoreResult } from "../analysis/pmf-score.ts";
 import type { MRRForecastResult } from "../analysis/mrr-forecast.ts";
 import type { ScenarioAnalysisResult, ScenarioResult } from "../analysis/scenario-engine.ts";
-import { formatCurrency, formatPercent, formatNumber, formatChange } from "../utils/formatting.ts";
+import { formatCurrency, formatPercent, formatNumber, formatChange, formatByUnit } from "../utils/formatting.ts";
 import { t, tMetric, tTrendIcon, tQRGradeIcon, tPMFGradeIcon } from "../i18n/index.ts";
 
 /** 健康狀態圖示 */
@@ -40,22 +40,6 @@ const PERFORMANCE_ICON: Record<string, string> = {
   average: "🟡",
   below: "🔴",
 };
-
-/**
- * 根據單位格式化數值
- */
-function formatValue(value: number, unit: string): string {
-  switch (unit) {
-    case "$":
-      return formatCurrency(value);
-    case "%":
-      return formatPercent(value);
-    case "#":
-      return formatNumber(value);
-    default:
-      return value.toLocaleString("en-US");
-  }
-}
 
 /**
  * 產生 Markdown 報告
@@ -85,11 +69,11 @@ export function renderMarkdownReport(report: HealthReport): string {
 
   for (const metric of sorted) {
     const name = tMetric(metric.metricId, metric.name);
-    const value = formatValue(metric.value, metric.unit);
+    const value = formatByUnit(metric.value, metric.unit);
     const icon = STATUS_ICON[metric.status] ?? "⚪";
     const trend = tTrendIcon(metric.trend);
     const change = metric.changePercent !== 0 ? formatChange(metric.changePercent) : "—";
-    const benchmark = metric.benchmark > 0 ? formatValue(metric.benchmark, metric.unit) : "—";
+    const benchmark = metric.benchmark > 0 ? formatByUnit(metric.benchmark, metric.unit) : "—";
 
     lines.push(`| ${name} | ${value} | ${icon} | ${trend} | ${change} | ${benchmark} |`);
   }

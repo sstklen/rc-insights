@@ -12,7 +12,8 @@ import type { QuickRatioResult } from "./quick-ratio.ts";
 import type { PMFScoreResult } from "./pmf-score.ts";
 import type { MRRForecastResult } from "./mrr-forecast.ts";
 import type { ScenarioAnalysisResult } from "./scenario-engine.ts";
-import { formatCurrency, formatPercent } from "../utils/formatting.ts";
+import { formatCurrency, formatPercent, formatByUnit } from "../utils/formatting.ts";
+import { tMetric } from "../i18n/index.ts";
 
 /** Executive Summary 結構 */
 export interface ExecutiveSummary {
@@ -112,8 +113,8 @@ export function generateExecutiveSummary(params: {
     );
     keyInsights.push({
       icon: "💪",
-      title: `Top Strength: ${getDisplayName(best.metricId)}`,
-      detail: `${getDisplayName(best.metricId)} at ${formatMetricValue(best.value, best.unit)} beats benchmark of ${formatMetricValue(best.benchmark, best.unit)}.`,
+      title: `Top Strength: ${tMetric(best.metricId, best.metricId)}`,
+      detail: `${tMetric(best.metricId, best.metricId)} at ${formatByUnit(best.value, best.unit)} beats benchmark of ${formatByUnit(best.benchmark, best.unit)}.`,
       urgency: "low",
     });
   }
@@ -124,8 +125,8 @@ export function generateExecutiveSummary(params: {
     const worst = redMetrics[0]!;
     keyInsights.push({
       icon: "🚨",
-      title: `Critical: ${getDisplayName(worst.metricId)}`,
-      detail: `${getDisplayName(worst.metricId)} at ${formatMetricValue(worst.value, worst.unit)} needs immediate attention.`,
+      title: `Critical: ${tMetric(worst.metricId, worst.metricId)}`,
+      detail: `${tMetric(worst.metricId, worst.metricId)} at ${formatByUnit(worst.value, worst.unit)} needs immediate attention.`,
       urgency: "high",
     });
   }
@@ -251,26 +252,3 @@ function buildTopAction(
   };
 }
 
-/** 指標顯示名稱 */
-function getDisplayName(id: string): string {
-  const names: Record<string, string> = {
-    mrr: "MRR",
-    arr: "ARR",
-    churn: "Churn Rate",
-    trial_conversion_rate: "Trial Conversion",
-    revenue: "Revenue",
-    refund_rate: "Refund Rate",
-    ltv_per_customer: "LTV/Customer",
-    ltv_per_paying_customer: "LTV/Paying Customer",
-  };
-  return names[id] ?? id;
-}
-
-/** 格式化指標值 */
-function formatMetricValue(value: number, unit: string): string {
-  switch (unit) {
-    case "$": return formatCurrency(value);
-    case "%": return formatPercent(value);
-    default: return value.toLocaleString("en-US");
-  }
-}

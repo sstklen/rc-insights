@@ -26,6 +26,9 @@ const reportCache = new Map<string, CachedReport>();
 /** 快取有效時間：5 分鐘 */
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
+/** 快取上限筆數 */
+const CACHE_MAX_SIZE = 20;
+
 /**
  * 取得健康報告（含快取）
  * 所有 tool 共用，避免同一 session 重複打 RevenueCat API
@@ -46,6 +49,20 @@ async function getReport(apiKey: string, projectId?: string): Promise<HealthRepo
   try {
     const report = await runHealthCheck(apiKey, projectId);
     reportCache.set(cacheKey, { report, timestamp: Date.now() });
+
+    // 超過上限時，刪除最舊的快取
+    if (reportCache.size > CACHE_MAX_SIZE) {
+      let oldestKey: string | undefined;
+      let oldestTime = Infinity;
+      for (const [key, entry] of reportCache) {
+        if (entry.timestamp < oldestTime) {
+          oldestTime = entry.timestamp;
+          oldestKey = key;
+        }
+      }
+      if (oldestKey) reportCache.delete(oldestKey);
+    }
+
     return report;
   } finally {
     // 復原環境變數

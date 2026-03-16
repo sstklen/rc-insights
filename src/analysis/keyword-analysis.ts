@@ -12,6 +12,7 @@ import type {
 } from "../api/types.ts";
 import type { RevenueCatClient } from "../api/client.ts";
 import { logger } from "../utils/logger.ts";
+import { sumSegmentValues, avgSegmentValues, extractValidSegments } from "../utils/segment.ts";
 
 /** 需要過濾掉的非真實關鍵字（API 回傳的佔位值） */
 const FILTERED_KEYWORDS = new Set([
@@ -19,55 +20,6 @@ const FILTERED_KEYWORDS = new Set([
   "no keyword",
   "no attribution",
 ]);
-
-/**
- * 判斷是否為需要過濾的關鍵字
- * 比對時忽略大小寫
- */
-function shouldFilterKeyword(keyword: string): boolean {
-  return FILTERED_KEYWORDS.has(keyword.toLowerCase().trim());
-}
-
-/**
- * 加總 segment 中所有 values 的 value 欄位
- * 只取 measure=0（主要量度）且非 incomplete 的資料點
- */
-function sumSegmentValues(segment: ChartSegment): number {
-  return segment.values
-    .filter((v) => v.measure === 0 && !v.incomplete)
-    .reduce((sum, v) => sum + v.value, 0);
-}
-
-/**
- * 計算 segment 中所有完整資料點的平均值
- * 用於轉換率等百分比指標
- */
-function avgSegmentValues(segment: ChartSegment): number | null {
-  const complete = segment.values.filter((v) => v.measure === 0 && !v.incomplete);
-  if (complete.length === 0) return null;
-  const sum = complete.reduce((acc, v) => acc + v.value, 0);
-  return sum / complete.length;
-}
-
-/**
- * 從 ChartData 的 segments 中提取有效的分段資料（排除 Total 和無歸因）
- * 回傳 Map<關鍵字, ChartSegment>
- */
-function extractValidSegments(
-  segments: ChartSegment[] | null | undefined,
-): Map<string, ChartSegment> {
-  const result = new Map<string, ChartSegment>();
-  if (!segments) return result;
-
-  for (const seg of segments) {
-    // 跳過 id 為 undefined/null/空字串的 segment
-    if (!seg.id) continue;
-    if (!shouldFilterKeyword(seg.id)) {
-      result.set(seg.id, seg);
-    }
-  }
-  return result;
-}
 
 /**
  * 判斷關鍵字效率等級
@@ -141,7 +93,7 @@ export async function analyzeKeywords(
   let revenueSegments: Map<string, ChartSegment> = new Map();
   try {
     const revenueData = await client.getChart(projectId, "revenue", segmentOptions);
-    revenueSegments = extractValidSegments(revenueData.segments);
+    revenueSegments = extractValidSegments(revenueData.segments, FILTERED_KEYWORDS);
     logger.debug(`Keyword revenue segments: ${revenueSegments.size}`);
   } catch (err) {
     logger.warn(`Failed to fetch keyword revenue: ${err instanceof Error ? err.message : String(err)}`);
@@ -151,7 +103,7 @@ export async function analyzeKeywords(
   let trialsSegments: Map<string, ChartSegment> = new Map();
   try {
     const trialsData = await client.getChart(projectId, "trials_new", segmentOptions);
-    trialsSegments = extractValidSegments(trialsData.segments);
+    trialsSegments = extractValidSegments(trialsData.segments, FILTERED_KEYWORDS);
     logger.debug(`Keyword trials segments: ${trialsSegments.size}`);
   } catch (err) {
     logger.warn(`Failed to fetch keyword trials: ${err instanceof Error ? err.message : String(err)}`);
@@ -161,7 +113,7 @@ export async function analyzeKeywords(
   let conversionSegments: Map<string, ChartSegment> = new Map();
   try {
     const conversionData = await client.getChart(projectId, "trial_conversion_rate", segmentOptions);
-    conversionSegments = extractValidSegments(conversionData.segments);
+    conversionSegments = extractValidSegments(conversionData.segments, FILTERED_KEYWORDS);
     logger.debug(`Keyword conversion segments: ${conversionSegments.size}`);
   } catch (err) {
     logger.debug(`Keyword conversion rate not available: ${err instanceof Error ? err.message : String(err)}`);

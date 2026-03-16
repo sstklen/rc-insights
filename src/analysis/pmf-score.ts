@@ -90,19 +90,20 @@ const FACTORS: FactorConfig[] = [
 /**
  * 計算 PMF Score
  *
- * @param trialConversionRate  - 試用轉換率，例如 41.2（百分比）
- * @param monthlyChurnRate     - 月流失率，例如 6.1（百分比）
- * @param quickRatio           - Quick Ratio，例如 1.0
- * @param revenueGrowthRate    - MoM 收入成長率，例如 0.4（百分比）
- * @param ltvPerPayingCustomer - 付費用戶終身價值，例如 18.93（美元）
+ * @param params.trialConversionRate  - 試用轉換率，例如 41.2（百分比）
+ * @param params.monthlyChurnRate     - 月流失率，例如 6.1（百分比）
+ * @param params.quickRatio           - Quick Ratio，例如 1.0
+ * @param params.revenueGrowthRate    - MoM 收入成長率，例如 0.4（百分比）
+ * @param params.ltvPerPayingCustomer - 付費用戶終身價值，例如 18.93（美元）
  */
-export function calculatePMFScore(
-  trialConversionRate: number,
-  monthlyChurnRate: number,
-  quickRatio: number,
-  revenueGrowthRate: number,
-  ltvPerPayingCustomer: number,
-): PMFScoreResult {
+export function calculatePMFScore(params: {
+  trialConversionRate: number;
+  monthlyChurnRate: number;
+  quickRatio: number;
+  revenueGrowthRate: number;
+  ltvPerPayingCustomer: number;
+}): PMFScoreResult {
+  const { trialConversionRate, monthlyChurnRate, quickRatio, revenueGrowthRate, ltvPerPayingCustomer } = params;
   const rawValues = [
     trialConversionRate,
     monthlyChurnRate,

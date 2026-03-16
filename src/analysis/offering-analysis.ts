@@ -12,57 +12,10 @@ import type {
 } from "../api/types.ts";
 import type { RevenueCatClient } from "../api/client.ts";
 import { logger } from "../utils/logger.ts";
+import { sumSegmentValues, avgSegmentValues, extractValidSegments } from "../utils/segment.ts";
 
 /** 需要過濾掉的 segment（Total 是所有 offering 的加總，不是具體 offering） */
 const FILTERED_OFFERING_IDS = new Set(["total"]);
-
-/**
- * 判斷是否為需要過濾的 offering segment
- */
-function shouldFilterOffering(offeringId: string): boolean {
-  return FILTERED_OFFERING_IDS.has(offeringId.toLowerCase().trim());
-}
-
-/**
- * 加總 segment 中所有 values 的 value 欄位
- * 只取 measure=0（主要量度）且非 incomplete 的資料點
- */
-function sumSegmentValues(segment: ChartSegment): number {
-  return segment.values
-    .filter((v) => v.measure === 0 && !v.incomplete)
-    .reduce((sum, v) => sum + v.value, 0);
-}
-
-/**
- * 計算 segment 中所有完整資料點的平均值
- * 用於轉換率等百分比指標
- */
-function avgSegmentValues(segment: ChartSegment): number | null {
-  const complete = segment.values.filter((v) => v.measure === 0 && !v.incomplete);
-  if (complete.length === 0) return null;
-  const sum = complete.reduce((acc, v) => acc + v.value, 0);
-  return sum / complete.length;
-}
-
-/**
- * 從 ChartData 的 segments 中提取有效的分段資料（排除 Total）
- * 回傳 Map<offering ID, ChartSegment>
- */
-function extractValidSegments(
-  segments: ChartSegment[] | null | undefined,
-): Map<string, ChartSegment> {
-  const result = new Map<string, ChartSegment>();
-  if (!segments) return result;
-
-  for (const seg of segments) {
-    // 跳過 id 為 undefined/null/空字串的 segment
-    if (!seg.id) continue;
-    if (!shouldFilterOffering(seg.id)) {
-      result.set(seg.id, seg);
-    }
-  }
-  return result;
-}
 
 /**
  * 根據營收排名判斷 offering 表現等級
@@ -104,7 +57,7 @@ export async function analyzeOfferings(
   let revenueSegments: Map<string, ChartSegment> = new Map();
   try {
     const revenueData = await client.getChart(projectId, "revenue", segmentOptions);
-    revenueSegments = extractValidSegments(revenueData.segments);
+    revenueSegments = extractValidSegments(revenueData.segments, FILTERED_OFFERING_IDS);
     logger.debug(`Offering revenue segments: ${revenueSegments.size}`);
   } catch (err) {
     logger.warn(`Failed to fetch offering revenue: ${err instanceof Error ? err.message : String(err)}`);
@@ -114,7 +67,7 @@ export async function analyzeOfferings(
   let conversionSegments: Map<string, ChartSegment> = new Map();
   try {
     const conversionData = await client.getChart(projectId, "trial_conversion_rate", segmentOptions);
-    conversionSegments = extractValidSegments(conversionData.segments);
+    conversionSegments = extractValidSegments(conversionData.segments, FILTERED_OFFERING_IDS);
     logger.debug(`Offering conversion segments: ${conversionSegments.size}`);
   } catch (err) {
     logger.debug(`Offering conversion rate not available: ${err instanceof Error ? err.message : String(err)}`);
@@ -124,7 +77,7 @@ export async function analyzeOfferings(
   let trialsSegments: Map<string, ChartSegment> = new Map();
   try {
     const trialsData = await client.getChart(projectId, "trials_new", segmentOptions);
-    trialsSegments = extractValidSegments(trialsData.segments);
+    trialsSegments = extractValidSegments(trialsData.segments, FILTERED_OFFERING_IDS);
     logger.debug(`Offering trials segments: ${trialsSegments.size}`);
   } catch (err) {
     logger.debug(`Offering trials not available: ${err instanceof Error ? err.message : String(err)}`);

@@ -271,13 +271,20 @@ export interface OfferingAnalysisResult {
 }
 
 /** Quick Ratio 分析結果（由 quick-ratio.ts 計算） */
-export type { QuickRatioResult } from "../analysis/quick-ratio.ts";
+import type { QuickRatioResult } from "../analysis/quick-ratio.ts";
+export type { QuickRatioResult };
 /** PMF Score 分析結果（由 pmf-score.ts 計算） */
-export type { PMFScoreResult } from "../analysis/pmf-score.ts";
+import type { PMFScoreResult } from "../analysis/pmf-score.ts";
+export type { PMFScoreResult };
 /** MRR 預測結果（由 mrr-forecast.ts 產生） */
-export type { MRRForecastResult } from "../analysis/mrr-forecast.ts";
+import type { MRRForecastResult } from "../analysis/mrr-forecast.ts";
+export type { MRRForecastResult };
 /** 場景分析結果（由 scenario-engine.ts 產生） */
-export type { ScenarioAnalysisResult } from "../analysis/scenario-engine.ts";
+import type { ScenarioAnalysisResult } from "../analysis/scenario-engine.ts";
+export type { ScenarioAnalysisResult };
+/** Executive Summary（由 executive-summary.ts 產生） */
+import type { ExecutiveSummary } from "../analysis/executive-summary.ts";
+export type { ExecutiveSummary };
 
 /** 完整健康報告 */
 export interface HealthReport {
@@ -300,13 +307,13 @@ export interface HealthReport {
   /** Offering/Paywall 實驗分析（額外 API 呼叫，可能為 undefined） */
   offeringAnalysis?: OfferingAnalysisResult;
   /** Quick Ratio 分析（需要 mrr_movement 圖表資料） */
-  quickRatio?: import("../analysis/quick-ratio.ts").QuickRatioResult;
+  quickRatio?: QuickRatioResult;
   /** PMF Score 分析（綜合多指標評分） */
-  pmfScore?: import("../analysis/pmf-score.ts").PMFScoreResult;
+  pmfScore?: PMFScoreResult;
   /** MRR 六個月預測（需要 12 個月歷史數據） */
-  mrrForecast?: import("../analysis/mrr-forecast.ts").MRRForecastResult;
+  mrrForecast?: MRRForecastResult;
   /** What-if 場景分析 */
-  scenarios?: import("../analysis/scenario-engine.ts").ScenarioAnalysisResult;
+  scenarios?: ScenarioAnalysisResult;
   /** LLM 增強建議（有 LLM API key 時可用） */
   llmRecommendations?: LLMRecommendationResult[];
   /** LLM 下一個產品建議 */
@@ -316,7 +323,7 @@ export interface HealthReport {
   /** 飛輪分析結果 */
   flywheel?: FlywheelResult;
   /** Executive Summary（報告最上面的關鍵提煉） */
-  executiveSummary?: import("../analysis/executive-summary.ts").ExecutiveSummary;
+  executiveSummary?: ExecutiveSummary;
 }
 
 /** LLM 增強建議 */

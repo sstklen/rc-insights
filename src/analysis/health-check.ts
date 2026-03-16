@@ -6,6 +6,7 @@
 import type {
   ChartData,
   ChartName,
+  ChartValue,
   HealthReport,
   MetricHealth,
   Anomaly,
@@ -75,20 +76,26 @@ function findOverviewValue(overview: OverviewMetric[], metricId: string): Overvi
 }
 
 /**
- * 計算月環比變化百分比
- * 從圖表資料的最近兩個月數據點推算
- * 只使用第一個量度（measure=0）的值，避免多量度圖表混亂
+ * 從圖表資料取得已篩選且排序的主要量度值
+ * 過濾 incomplete 資料、僅保留主要量度，並依時間排序
  */
-function calculateMoMChange(chartData: ChartData): number {
+function getCompletePrimaryValues(chartData: ChartData, order: "asc" | "desc"): ChartValue[] {
   const measureIdx = getPrimaryMeasureIndex(chartData);
-  const completeValues = chartData.values
-    .filter((v) => !v.incomplete && v.measure === measureIdx)
-    .sort((a, b) => a.cohort - b.cohort);
+  const filtered = chartData.values.filter((v) => !v.incomplete && v.measure === measureIdx);
+  return order === "asc"
+    ? filtered.sort((a, b) => a.cohort - b.cohort)
+    : filtered.sort((a, b) => b.cohort - a.cohort);
+}
 
-  if (completeValues.length < 2) return 0;
+/**
+ * 計算月環比變化百分比
+ * 從預先篩選排序好的值（asc）推算
+ */
+function calculateMoMChange(values: ChartValue[]): number {
+  if (values.length < 2) return 0;
 
-  const latest = completeValues[completeValues.length - 1];
-  const previous = completeValues[completeValues.length - 2];
+  const latest = values[values.length - 1];
+  const previous = values[values.length - 2];
 
   if (!latest || !previous || previous.value === 0) return 0;
 
@@ -99,16 +106,11 @@ function calculateMoMChange(chartData: ChartData): number {
  * 偵測趨勢方向
  * 使用最近 3 個數據點判斷走勢
  */
-function detectTrend(chartData: ChartData): TrendDirection {
-  const measureIdx = getPrimaryMeasureIndex(chartData);
-  const completeValues = chartData.values
-    .filter((v) => !v.incomplete && v.measure === measureIdx)
-    .sort((a, b) => a.cohort - b.cohort);
-
-  if (completeValues.length < 3) return "stable";
+function detectTrend(values: ChartValue[]): TrendDirection {
+  if (values.length < 3) return "stable";
 
   // 取最近 3 個數據點
-  const recent = completeValues.slice(-3);
+  const recent = values.slice(-3);
   const first = recent[0]!.value;
   const last = recent[recent.length - 1]!.value;
 
@@ -126,16 +128,12 @@ function detectTrend(chartData: ChartData): TrendDirection {
  * 偵測異常值
  * 標準：任一數據點變化超過前一點 30% 以上
  */
-function detectAnomalies(chartData: ChartData, metricName: string): Anomaly[] {
+function detectAnomalies(values: ChartValue[], metricName: string): Anomaly[] {
   const anomalies: Anomaly[] = [];
-  const measureIdx = getPrimaryMeasureIndex(chartData);
-  const completeValues = chartData.values
-    .filter((v) => !v.incomplete && v.measure === measureIdx)
-    .sort((a, b) => a.cohort - b.cohort);
 
-  for (let i = 1; i < completeValues.length; i++) {
-    const prev = completeValues[i - 1]!;
-    const curr = completeValues[i]!;
+  for (let i = 1; i < values.length; i++) {
+    const prev = values[i - 1]!;
+    const curr = values[i]!;
 
     if (prev.value === 0) continue;
 
@@ -194,16 +192,10 @@ function getPrimaryMeasureIndex(chartData: ChartData): number {
 }
 
 /**
- * 從圖表資料取得最新值
- * 自動選擇正確的量度（例如 Churn 取 Churn Rate 而不是 Actives 數量）
+ * 從預先篩選排序好的值（asc）取得最新值
  */
-function getLatestValue(chartData: ChartData): number {
-  const measureIdx = getPrimaryMeasureIndex(chartData);
-  const completeValues = chartData.values
-    .filter((v) => !v.incomplete && v.measure === measureIdx)
-    .sort((a, b) => b.cohort - a.cohort);
-
-  return completeValues[0]?.value ?? 0;
+function getLatestValue(valuesAsc: ChartValue[]): number {
+  return valuesAsc[valuesAsc.length - 1]?.value ?? 0;
 }
 
 /**
@@ -285,10 +277,13 @@ export async function runHealthCheck(
     const primaryMeasure = chartData.measures?.[primaryIdx];
     const unit = primaryMeasure?.unit ?? getUnitForMetric(chartName, overviewMetric);
 
+    // 一次篩選排序，供所有分析函數共用
+    const valuesAsc = getCompletePrimaryValues(chartData, "asc");
+
     // 從圖表取主要量度的最新值（比概覽更精確，因為概覽可能是不同指標）
-    const value = getLatestValue(chartData);
-    const change = calculateMoMChange(chartData);
-    const trend = detectTrend(chartData);
+    const value = getLatestValue(valuesAsc);
+    const change = calculateMoMChange(valuesAsc);
+    const trend = detectTrend(valuesAsc);
 
     // 健康狀態判定
     let status: HealthStatus = "yellow";
@@ -313,8 +308,8 @@ export async function runHealthCheck(
       benchmarkLabel,
     });
 
-    // 偵測異常
-    const anomalies = detectAnomalies(chartData, chartData.display_name || chartName);
+    // 偵測異常（使用已排序的 asc 值）
+    const anomalies = detectAnomalies(valuesAsc, chartData.display_name || chartName);
     allAnomalies.push(...anomalies);
   }
 
@@ -354,13 +349,13 @@ export async function runHealthCheck(
     const revenueGrowthRate = mrrMetricForPMF?.changePercent ?? revenueMetric?.changePercent ?? 0;
     const ltvPerPayingCustomer = ltvMetric?.value ?? 0;
 
-    pmfScoreResult = calculatePMFScore(
+    pmfScoreResult = calculatePMFScore({
       trialConversionRate,
       monthlyChurnRate,
-      qr,
+      quickRatio: qr,
       revenueGrowthRate,
       ltvPerPayingCustomer,
-    );
+    });
     logger.debug(`PMF Score: ${pmfScoreResult.score}/100 (${pmfScoreResult.grade})`);
   } catch (err) {
     logger.warn(`Failed to calculate PMF Score: ${err instanceof Error ? err.message : String(err)}`);
@@ -418,13 +413,13 @@ export async function runHealthCheck(
         monthlyNewTrials = trialsValues[0]?.value ?? 0;
       }
 
-      scenarioResult = runScenarios(
+      scenarioResult = runScenarios({
         currentMRR,
         monthlyChurn,
         monthlyNewMRR,
         trialConversionRate,
         monthlyNewTrials,
-      );
+      });
 
       forecastCalcSpinner.succeed(
         `MRR forecast: ${mrrForecastResult.predictions.length} months | ` +

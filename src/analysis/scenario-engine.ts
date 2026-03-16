@@ -238,20 +238,21 @@ function scenarioPriceOptimization(
 /**
  * 執行所有 What-if 場景分析
  *
- * @param currentMRR - 目前 MRR
- * @param monthlyChurn - 月流失率百分比（例如 6.1）
- * @param monthlyNewMRR - 每月新增 MRR 金額
- * @param trialConversionRate - 試用轉換率百分比
- * @param monthlyNewTrials - 每月新增試用數
+ * @param params.currentMRR - 目前 MRR
+ * @param params.monthlyChurn - 月流失率百分比（例如 6.1）
+ * @param params.monthlyNewMRR - 每月新增 MRR 金額
+ * @param params.trialConversionRate - 試用轉換率百分比
+ * @param params.monthlyNewTrials - 每月新增試用數
  * @returns 場景分析結果
  */
-export function runScenarios(
-  currentMRR: number,
-  monthlyChurn: number,
-  monthlyNewMRR: number,
-  trialConversionRate: number,
-  monthlyNewTrials: number,
-): ScenarioAnalysisResult {
+export function runScenarios(params: {
+  currentMRR: number;
+  monthlyChurn: number;
+  monthlyNewMRR: number;
+  trialConversionRate: number;
+  monthlyNewTrials: number;
+}): ScenarioAnalysisResult {
+  const { currentMRR, monthlyChurn, monthlyNewMRR, trialConversionRate, monthlyNewTrials } = params;
   // 計算維持現狀的基準預測
   const churnRate = monthlyChurn / 100;
   const baseline = baselineProjection(currentMRR, churnRate, monthlyNewMRR);

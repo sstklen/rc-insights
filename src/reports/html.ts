@@ -17,7 +17,7 @@ import type { QuickRatioResult } from "../analysis/quick-ratio.ts";
 import type { PMFScoreResult } from "../analysis/pmf-score.ts";
 import type { MRRForecastResult } from "../analysis/mrr-forecast.ts";
 import type { ScenarioAnalysisResult, ScenarioResult } from "../analysis/scenario-engine.ts";
-import { formatCurrency, formatPercent, formatNumber, formatChange } from "../utils/formatting.ts";
+import { formatCurrency, formatPercent, formatNumber, formatChange, formatByUnit } from "../utils/formatting.ts";
 import { t, tMetric, tTrend, tQRGrade, tPMFGrade, getLocale } from "../i18n/index.ts";
 
 /** 健康狀態對應的 CSS class */
@@ -33,22 +33,6 @@ const STATUS_DOT: Record<string, string> = {
   yellow: "🟡",
   red: "🔴",
 };
-
-/**
- * 格式化數值
- */
-function formatValue(value: number, unit: string): string {
-  switch (unit) {
-    case "$":
-      return formatCurrency(value);
-    case "%":
-      return formatPercent(value);
-    case "#":
-      return formatNumber(value);
-    default:
-      return value.toLocaleString("en-US");
-  }
-}
 
 /**
  * 跳脫 HTML 特殊字元，防止 XSS
@@ -67,12 +51,12 @@ function escapeHtml(text: string): string {
  */
 function renderMetricCard(metric: MetricHealth): string {
   const name = tMetric(metric.metricId, metric.name);
-  const value = formatValue(metric.value, metric.unit);
+  const value = formatByUnit(metric.value, metric.unit);
   const dot = STATUS_DOT[metric.status] ?? "⚪";
   const statusClass = STATUS_CLASS[metric.status] ?? "";
   const change = metric.changePercent !== 0 ? formatChange(metric.changePercent) : "";
   const changeClass = metric.changePercent > 0 ? "change-positive" : metric.changePercent < 0 ? "change-negative" : "";
-  const benchmark = metric.benchmark > 0 ? formatValue(metric.benchmark, metric.unit) : "";
+  const benchmark = metric.benchmark > 0 ? formatByUnit(metric.benchmark, metric.unit) : "";
 
   return `
     <div class="metric-card ${statusClass}">
@@ -154,7 +138,7 @@ function renderHealthBars(metrics: MetricHealth[]): string {
       const name = tMetric(m.metricId, m.name);
       const width = calculateBarWidth(m);
       const colorClass = STATUS_CLASS[m.status] ?? "";
-      const value = formatValue(m.value, m.unit);
+      const value = formatByUnit(m.value, m.unit);
 
       return `
       <div class="bar-row">
