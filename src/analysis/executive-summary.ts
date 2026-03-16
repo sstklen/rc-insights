@@ -13,7 +13,8 @@ import type { PMFScoreResult } from "./pmf-score.ts";
 import type { MRRForecastResult } from "./mrr-forecast.ts";
 import type { ScenarioAnalysisResult } from "./scenario-engine.ts";
 import { formatCurrency, formatPercent, formatByUnit } from "../utils/formatting.ts";
-import { tMetric } from "../i18n/index.ts";
+// i18n 不在數據層使用 — executive summary 用 metric.name (API display_name)
+// 翻譯由 render 層負責，確保數據層語言無關
 
 /** Executive Summary 結構 */
 export interface ExecutiveSummary {
@@ -113,8 +114,8 @@ export function generateExecutiveSummary(params: {
     );
     keyInsights.push({
       icon: "💪",
-      title: `Top Strength: ${tMetric(best.metricId, best.metricId)}`,
-      detail: `${tMetric(best.metricId, best.metricId)} at ${formatByUnit(best.value, best.unit)} beats benchmark of ${formatByUnit(best.benchmark, best.unit)}.`,
+      title: `Top Strength: ${best.name}`,
+      detail: `${best.name} at ${formatByUnit(best.value, best.unit)} beats benchmark of ${formatByUnit(best.benchmark, best.unit)}.`,
       urgency: "low",
     });
   }
@@ -125,8 +126,8 @@ export function generateExecutiveSummary(params: {
     const worst = redMetrics[0]!;
     keyInsights.push({
       icon: "🚨",
-      title: `Critical: ${tMetric(worst.metricId, worst.metricId)}`,
-      detail: `${tMetric(worst.metricId, worst.metricId)} at ${formatByUnit(worst.value, worst.unit)} needs immediate attention.`,
+      title: `Critical: ${worst.name}`,
+      detail: `${worst.name} at ${formatByUnit(worst.value, worst.unit)} needs immediate attention.`,
       urgency: "high",
     });
   }

@@ -121,9 +121,10 @@ const baseInputSchema = {
   projectId: z.string().optional().describe("Project ID (optional, auto-detects if not specified)"),
 };
 
+// MCP 回傳結構化 JSON，不做語言渲染 → 不需要 lang 參數
+// 語言翻譯交由客戶端或 HTTP /report/html?lang=zh 端點處理
 const analyzeInputSchema = {
   ...baseInputSchema,
-  lang: z.enum(["en", "zh", "ja"]).optional().describe("Report language (default: en)"),
 };
 
 // ========================================
@@ -153,9 +154,7 @@ export async function startMCPServer(): Promise<void> {
     analyzeInputSchema,
     async (args) => {
       try {
-        // MCP 回傳結構化 JSON 數據，不需要 i18n 渲染。
-        // lang 參數保留在 schema 供未來擴充（如回傳已渲染文字時使用），
-        // 但不改全域 locale — 避免併發請求交叉污染。
+        // MCP 回傳結構化 JSON 數據，語言無關，不涉及 i18n
         const report = await getReport(args.apiKey, args.projectId);
 
         const result = {

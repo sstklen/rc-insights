@@ -7,7 +7,7 @@
 import { runHealthCheck } from "../analysis/health-check.ts";
 import { renderHtmlReport } from "../reports/html.ts";
 import { renderMarkdownReport } from "../reports/markdown.ts";
-import { setLocale, getLocale } from "../i18n/index.ts";
+import { setLocale } from "../i18n/index.ts";
 import type { Locale } from "../i18n/index.ts";
 import type { HealthReport } from "../api/types.ts";
 import { buildAgentCard } from "../a2a/agent-card.ts";
@@ -142,23 +142,21 @@ async function parseRequest(
 async function runAnalysis(
   apiKey: string,
   projectId?: string,
-  lang?: string,
+  _lang?: string,
 ): Promise<HealthReport> {
-  // 設定語系（預設 en）— 保存/恢復以減少併發風險
-  // 注意：這不是完全併發安全的（全域 mutable state），
-  // 但 HTTP serve 是相對低併發場景，v1 可接受。
-  // 完整修法需要 AsyncLocalStorage 或將 locale 參數化到 render 層。
-  const prevLocale = getLocale();
-  const locale = lang ?? "en";
-  if (["en", "zh", "ja"].includes(locale)) {
-    setLocale(locale as Locale);
-  }
+  // runHealthCheck 是語言無關的（數據層不依賴 i18n）
+  // locale 設定只在同步渲染時做，由呼叫方負責
+  return await runHealthCheck(apiKey, projectId);
+}
 
-  try {
-    return await runHealthCheck(apiKey, projectId);
-  } finally {
-    setLocale(prevLocale);
-  }
+/**
+ * 設定 locale 並同步渲染 — 因為渲染是同步的，不會被 await 中斷，
+ * 所以不存在併發競態。setLocale → render → 完成，全在一個 microtask 內。
+ */
+function renderWithLocale(report: HealthReport, lang: string | undefined, format: "html" | "md"): string {
+  const locale = (lang && ["en", "zh", "ja"].includes(lang) ? lang : "en") as Locale;
+  setLocale(locale);
+  return format === "html" ? renderHtmlReport(report) : renderMarkdownReport(report);
 }
 
 /** 路由處理 */
@@ -244,8 +242,8 @@ async function handleRequest(req: Request): Promise<Response> {
     }
 
     try {
-      const report = await runAnalysis(params.apiKey, params.projectId, params.lang);
-      const html = renderHtmlReport(report);
+      const report = await runAnalysis(params.apiKey, params.projectId);
+      const html = renderWithLocale(report, params.lang, "html");
       return htmlResponse(html);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -263,8 +261,8 @@ async function handleRequest(req: Request): Promise<Response> {
     }
 
     try {
-      const report = await runAnalysis(params.apiKey, params.projectId, params.lang);
-      const md = renderMarkdownReport(report);
+      const report = await runAnalysis(params.apiKey, params.projectId);
+      const md = renderWithLocale(report, params.lang, "md");
       return markdownResponse(md);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
