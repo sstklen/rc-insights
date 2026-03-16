@@ -206,6 +206,36 @@ export interface Recommendation {
   relatedMetric: string;
   /** 預期影響 */
   impact: "high" | "medium" | "low";
+  /** 決策後的具體行動（閉環） */
+  actions?: ActionStep[];
+  /** 驗證方式：做完後怎麼確認有效 */
+  verify?: VerifyStep;
+}
+
+/** 具體行動步驟 */
+export interface ActionStep {
+  /** 行動描述 */
+  what: string;
+  /** 在哪裡做（Dashboard URL / MCP tool / 外部工具） */
+  where: "revenuecat_dashboard" | "mcp" | "app_store_connect" | "code" | "external";
+  /** RevenueCat Dashboard 的具體路徑（如果 where=revenuecat_dashboard） */
+  dashboardPath?: string;
+  /** MCP Server tool 名稱（如果 where=mcp） */
+  mcpTool?: string;
+  /** MCP tool 參數（如果 where=mcp） */
+  mcpParams?: Record<string, unknown>;
+}
+
+/** 驗證步驟：做完行動後怎麼確認有效 */
+export interface VerifyStep {
+  /** 要看什麼指標 */
+  metric: string;
+  /** 預期方向 */
+  direction: "increase" | "decrease" | "stable";
+  /** 多久後檢查 */
+  checkAfter: string;
+  /** 成功的判定標準 */
+  successCriteria: string;
 }
 
 // ========================================

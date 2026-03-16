@@ -123,12 +123,34 @@ function renderMetricsTable(metrics: MetricHealth[]): string {
 function renderRecommendations(recommendations: Recommendation[], maxCount = 5): string {
   const lines: string[] = [];
   const top = recommendations.slice(0, maxCount);
+  const whereIcon: Record<string, string> = {
+    revenuecat_dashboard: "📊",
+    mcp: "🤖",
+    app_store_connect: "🍎",
+    code: "💻",
+    external: "🔗",
+  };
 
   for (let i = 0; i < top.length; i++) {
     const rec = top[i]!;
     const impactLabel = impactColor(rec.impact)(`[${rec.impact.toUpperCase()}]`);
     lines.push(`  ${chalk.bold.white(`${i + 1}.`)} ${chalk.bold(rec.title)} ${impactLabel}`);
     lines.push(`     ${chalk.gray("→")} ${rec.description}`);
+
+    // 行動步驟
+    if (rec.actions && rec.actions.length > 0) {
+      for (const action of rec.actions) {
+        const icon = whereIcon[action.where] ?? "▸";
+        const mcpNote = action.mcpTool ? chalk.cyan(` [MCP: ${action.mcpTool}]`) : "";
+        lines.push(`     ${icon} ${chalk.white(action.what)}${mcpNote}`);
+      }
+    }
+
+    // 驗證
+    if (rec.verify) {
+      lines.push(`     ${chalk.gray(`✓ Verify: check ${rec.verify.metric} ${rec.verify.direction} after ${rec.verify.checkAfter} — ${rec.verify.successCriteria}`)}`);
+    }
+
     lines.push("");
   }
 
