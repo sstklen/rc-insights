@@ -22,6 +22,7 @@ import type { MRRForecastResult } from "../analysis/mrr-forecast.ts";
 import type { ScenarioAnalysisResult } from "../analysis/scenario-engine.ts";
 import { formatCurrency, formatPercent, formatNumber, formatChange, formatByUnit } from "../utils/formatting.ts";
 import { t, tMetric, tTrend, tQRGrade, tPMFGrade } from "../i18n/index.ts";
+import { renderHeadline, renderInsight, renderTopAction, renderFlywheelLevel } from "../analysis/executive-summary.ts";
 
 /** 健康狀態對應的圖示 */
 const STATUS_ICON: Record<string, string> = {
@@ -484,7 +485,7 @@ export function renderTerminalReport(report: HealthReport): string {
     chalk.gray(`  ${t("header.generated")}: ${new Date(report.generatedAt).toLocaleString()}`),
   );
 
-  // ★ Executive Summary（報告最上面的關鍵提煉）
+  // ★ Executive Summary（使用 render-time i18n）
   if (report.executiveSummary) {
     const es = report.executiveSummary;
     const gradeColor =
@@ -492,20 +493,24 @@ export function renderTerminalReport(report: HealthReport): string {
       es.healthGrade === "Good" ? chalk.cyan :
       es.healthGrade === "Fair" ? chalk.yellow : chalk.red;
 
+    const headline = renderHeadline(es);
     sections.push("");
-    sections.push(`  ${gradeColor.bold(`[${es.healthGrade.toUpperCase()}]`)} ${chalk.bold.white(es.headline)}`);
+    sections.push(`  ${gradeColor.bold(`[${es.healthGrade.toUpperCase()}]`)} ${chalk.bold.white(headline)}`);
     sections.push(`  ${chalk.gray(`Health Score: ${es.healthScore}/100`)}`);
     sections.push("");
 
-    for (const insight of es.keyInsights) {
-      const uColor = insight.urgency === "high" ? chalk.red : insight.urgency === "medium" ? chalk.yellow : chalk.green;
-      sections.push(`  ${insight.icon} ${uColor.bold(insight.title)}`);
-      sections.push(`     ${chalk.gray(insight.detail)}`);
+    for (const insightData of es.keyInsights) {
+      const { title, detail } = renderInsight(insightData);
+      const uColor = insightData.urgency === "high" ? chalk.red : insightData.urgency === "medium" ? chalk.yellow : chalk.green;
+      sections.push(`  ${insightData.icon} ${uColor.bold(title)}`);
+      sections.push(`     ${chalk.gray(detail)}`);
     }
     sections.push("");
-    sections.push(`  ${chalk.bold.cyan("→ #1 Action:")} ${chalk.bold(es.topAction.title)}`);
-    sections.push(`     ${chalk.gray(es.topAction.reason)} → ${chalk.green(es.topAction.expectedImpact)}`);
-    sections.push(`  ${chalk.gray(`Flywheel Layer ${es.flywheelLevel.current}/4: ${es.flywheelLevel.label}`)}`);
+    const action = renderTopAction(es);
+    sections.push(`  ${chalk.bold.cyan("→ #1 Action:")} ${chalk.bold(action.title)}`);
+    sections.push(`     ${chalk.gray(action.reason)} → ${chalk.green(action.impact)}`);
+    const fw = renderFlywheelLevel(es);
+    sections.push(`  ${chalk.gray(`Flywheel Layer ${es.flywheelLevel.current}/4: ${fw.label}`)}`);
   }
 
   // 概覽指標

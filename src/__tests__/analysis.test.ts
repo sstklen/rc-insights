@@ -8,7 +8,7 @@ import { calculateQuickRatio, getMultiMeasureTimeSeries } from "../analysis/quic
 import { calculatePMFScore } from "../analysis/pmf-score.ts";
 import { forecastMRR } from "../analysis/mrr-forecast.ts";
 import { runScenarios } from "../analysis/scenario-engine.ts";
-import { generateExecutiveSummary } from "../analysis/executive-summary.ts";
+import { generateExecutiveSummary, renderHeadline, renderInsight } from "../analysis/executive-summary.ts";
 import { linearInterpolate, clamp, weightedAverage, trendSlope } from "../utils/math.ts";
 import { formatCurrency, formatPercent, formatNumber, formatByUnit } from "../utils/formatting.ts";
 import { sumSegmentValues, avgSegmentValues, extractValidSegments } from "../utils/segment.ts";
@@ -256,8 +256,8 @@ describe("Executive Summary", () => {
     });
     expect(summary.healthScore).toBeGreaterThan(0);
     expect(summary.healthGrade).toBeTruthy();
-    expect(summary.headline).toBeTruthy();
-    expect(summary.topAction.title).toBeTruthy();
+    expect(renderHeadline(summary)).toBeTruthy();
+    expect(summary.topAction.scenarioName).toBeTruthy();
   });
 
   it("includes key insights", () => {
