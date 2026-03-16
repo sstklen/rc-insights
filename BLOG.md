@@ -1,121 +1,146 @@
-# From Data to Gold: An AI Growth Engine for RevenueCat
+# From Data to Decisions: What I Learned Building Against RevenueCat's Charts API
+
+I built a CLI tool that connects to the RevenueCat Charts API, analyzes your subscription metrics, and tells you what to do about them. Along the way, I found three real API bugs, discovered that one number matters more than fourteen separate metrics, and formed some opinions about where subscription analytics should go.
+
+Here's what happened.
 
 ---
 
-## The Gap
-
-RevenueCat's dashboard shows MRR, churn, trial conversion. The numbers are there. The problem is what happens next.
-
-A developer sees churn at 6.7% and thinks: *"Is that bad? What do I do?"* Then closes the tab because there are bugs to ship.
-
-**The gap is not data. The gap is diagnosis.**
-
-rc-insights fills that gap. One command, 30 seconds, complete diagnosis:
+## The Tool: One Command, One Answer
 
 ```bash
 bun run rc-insights analyze --api-key sk_xxxxx
 ```
 
-Not a dashboard. A doctor — reads the labs, diagnoses, prescribes, predicts.
-
----
-
-## The Crystal Ball
-
-### Quick Ratio — One Number to Rule Them All
+30 seconds later, you get this:
 
 ```
-Quick Ratio = (New + Resub + Expansion MRR) / (Churned + Contraction MRR)
+[GOOD] $4,562 MRR with solid fundamentals — optimize to unlock growth.
+Health Score: 60.7/100
+
+⚖️  Treading Water: QR 1.1x
+💪  Top Strength: Trial Conversion (47.4% vs 35% benchmark)
+💡  Best Lever: Scale Acquisition → +$1,166/month within 12 months
+🔮  6-Month Outlook: $4,865
 ```
 
-Above 1.0 = growing. Below 1.0 = shrinking. Dark Noise scored **1.00** — treading water. That single number told a clearer story than 14 separate metrics.
+Five lines. That's it. A developer reads this in 10 seconds and knows: my product converts well, but I'm not growing, and the best move is to get more users into my funnel.
 
-### PMF Score — Is Your Product Working?
-
-Five factors, weighted, compressed to 0-100. Crossed with Quick Ratio to produce a verdict: **Double Down / Optimize / Pivot / Harvest.** Dark Noise: 55/100, verdict = Optimize.
-
-### What-If Scenarios
-
-Three simulations: Fix Churn → +26% MRR. Scale Acquisition → +27%. Raise Prices → +20%. Each projected month-by-month for 12 months against a do-nothing baseline.
+Everything else — the 14-metric breakdown, the MRR forecast, the what-if scenarios — is there if you want to dig deeper. But those five lines are the product.
 
 ---
 
-## The Data Flywheel
+## Three Real API Bugs I Found
 
-The core thesis: **the most valuable insights come from combining data sources nobody else combines.**
+Building against the real API (not mock data) surfaced issues that documentation review never would.
 
-| Layer | What | Cost |
-|-------|------|------|
-| 1 | Your data → diagnosis + prediction | Free |
-| 2 | Peer comparison → "apps like you do X" | $ |
-| 3 | Category intelligence → pricing, retention | $$ |
-| 4 | Market opportunity → adjacent verticals | $$$ |
+### Bug 1: `items` vs `projects`
 
-Each layer uses more API, generates more value, justifies higher pricing.
+The `/v2/projects` endpoint returns `{ items: [...] }`. I wrote `response.projects` and crashed. The field follows a generic list pattern — consistent with other endpoints — but when you're a developer writing code at 11pm, the mismatch between the resource name ("projects") and the response field ("items") costs 15 minutes.
+
+**Product suggestion**: An alias — return both `items` and `projects` — would cost RevenueCat nothing and save every developer who builds against this endpoint.
+
+### Bug 2: Multi-Measure Charts Are a Hidden Gold Mine
+
+This was the most interesting discovery. The Churn chart endpoint returns **three** measures:
+
+- Measure 0: Active Subscribers (count: 2,535)
+- Measure 1: Churned Subscribers (count)
+- Measure 2: Churn Rate (percentage: 6.7%)
+
+My code grabbed measure 0 and displayed "Churn Rate: 2,535%". Whoops.
+
+The fix: read the `measures` array and look for `chartable: true` with `unit: "%"`. This works, but I had to reverse-engineer it from the response data.
+
+**Product suggestion**: A `primary: true` flag on the intended display measure would save every developer this detective work. The multi-measure design is actually powerful — MRR Movement has six measures (New, Resubscription, Expansion, Churned, Contraction, Net) — but without documentation on which measure maps to what, developers have to guess.
+
+### Bug 3: Seasonality Breaks Composite Scores
+
+I built a PMF (Product-Market Fit) Score from five weighted factors. One factor was "Revenue Growth (MoM)". February showed -36.2% because January had a seasonal spike. That single number dragged the entire PMF Score from 60 to 42 — making a healthy app look like it's failing.
+
+The fix: use MRR's MoM change (+0.4%) instead of Revenue's. MRR only counts recurring revenue, so it's structurally smoother.
+
+**Lesson for any developer building analytics**: Never use a single month's change in a composite score. Use the most stable proxy available, or deseasonalize first.
 
 ---
 
-## Gold Data
+## The One Number That Matters: Quick Ratio
 
-Most tools stop at insights. We go further:
+Of everything I built, Quick Ratio is the most useful.
 
 ```
-Data      = "Your churn rate is 6.7%"
-Insights  = "Your churn is 12% higher than peers, fixable with dunning"
-Gold Data = AI Agent auto-detects 50 at-risk users
-            → auto-creates win-back Offering via MCP
-            → 30 renew → +$90/month MRR
-            → repeats, improves each cycle
+Quick Ratio = (New MRR + Resubscription + Expansion) / (Churned MRR + Contraction)
 ```
 
-> **Gold Data is not data. It's revenue an AI agent earns autonomously.**
+- Above 4.0: Hyper-growth
+- 2.0–4.0: Healthy
+- 1.0–2.0: Growing, but barely
+- Below 1.0: Shrinking
 
-This isn't theoretical. Stripe recovered **$6.5B** with smart dunning in 2024. ChurnZero reports **40% retention improvement**. Botsi maximizes LTV per-user with RevenueCat integration, charging only on uplift.
+Dark Noise's Quick Ratio: **1.05**. For every dollar that comes in, $0.95 walks out. The business isn't declining — but it's not growing either. That single number says more than MRR, Churn, Trial Conversion, LTV, and Revenue combined.
 
-The formula: **Internal Data × External Data × Autonomous Action = Revenue.**
+RevenueCat's MRR Movement chart has all six components needed to calculate this. But the Dashboard doesn't show Quick Ratio. rc-insights does.
 
----
-
-## AI Agents Are Customers
-
-Gartner: by 2028, **90% of B2B purchases handled by AI agents, $15 trillion.** The customer is not always human anymore.
-
-rc-insights is built for this:
-
-| Layer | Customer | Interface | Revenue |
-|-------|----------|-----------|---------|
-| 1 | Human developer | CLI + HTML | Free |
-| 2 | Other AI agents | MCP Server (7 tools) | $0.10/call |
-| 3 | Autonomous agents | A2A + MCP + auto-execute | 5-10% of recovered MRR |
-
-We built an **MCP Server** with 7 discoverable tools. Any AI agent can call `analyze_subscription_health` and receive structured insights + executable MCP actions pointing at RevenueCat's MCP Server. Zero humans involved.
-
-We publish an **A2A Agent Card** at `/.well-known/agent.json`. We serve **WebMCP** endpoints. The full 2026 protocol stack: MCP (tools) + A2A (agents) + WebMCP (web).
-
-**This is not a tool with AI features. This is AI infrastructure that serves other AI agents.**
+**Why this matters for RevenueCat**: Quick Ratio is the kind of derived metric that turns data into decisions. A developer who sees "Quick Ratio: 1.05" immediately understands their situation in a way that "MRR: $4,562, Churn: 6.7%, New MRR: $270/mo" doesn't convey.
 
 ---
 
-## What I Learned Building Against the Real API
+## What-If Scenarios: "What Should I Actually Do?"
 
-**Bug 1:** API returns `items`, not `projects`. 15 minutes of debugging at 11pm.
+Data tells you where you are. Decisions tell you where to go. But developers need to know **which decision matters most**.
 
-**Bug 2:** Churn chart has 3 measures — our code grabbed measure 0 (Active Subscribers count) and displayed "Churn: 2,535%". Fix: read `chartable: true` flag. **Product feedback:** a `primary: true` flag on measures would save every developer.
+rc-insights simulates three scenarios against the real data:
 
-**Bug 3:** Seasonal revenue drop (-36%) poisoned the PMF Score. Fix: use MRR's MoM (structurally smoother) instead of Revenue's MoM.
+| Scenario | 12-Month MRR Impact |
+|----------|-------------------|
+| Fix Churn (reduce to 4%) | +$1,145/month (+26.5%) |
+| Scale Acquisition (+50% trials) | +$1,166/month (+27.0%) |
+| Raise Prices (+20% ARPU) | +$865/month (+20.0%) |
 
-**Biggest missing API:** `/v2/benchmarks` — anonymized aggregate data by category, price tier, MRR band. RevenueCat has 115K apps and $16B+ in tracked revenue. That data, exposed via API, would be the most valuable endpoint in the subscription economy.
+For Dark Noise, the answer is clear: **Scale Acquisition wins by a hair**. The trial conversion rate (47.4%) is already excellent, so pouring more users into the funnel has the highest ROI.
 
----
+But here's the strategic insight the numbers alone don't show: Dark Noise's Quick Ratio of 1.05 means the business has **already stabilized**. Churn and acquisition are balanced. The only way to break out of that equilibrium is to either dramatically change the economics (raise prices) or dramatically increase volume (more trials). For a white noise app that delivers 100% of its value on Day 1, the structural fix is shifting to annual-first pricing — which bypasses 11 monthly churn decision points.
 
-## The Thesis
-
-The subscription economy adds 15,000 new apps per month. The gap between winners (+80% YoY) and losers (-33% YoY) is widening.
-
-The winners won't be staring at dashboards. They'll have AI agents optimizing subscriptions 24/7.
-
-**The future of subscription analytics is not showing developers their data. It's building AI agents that use the data to make money while they sleep.**
+That kind of reasoning — from data to decision to strategic action — is what subscription analytics should deliver.
 
 ---
 
-*Built against RevenueCat Charts API v2 with real data from [Dark Noise](https://darknoise.app/). 32 TypeScript files, 9,800+ lines, zero errors, 3 languages, 7 MCP tools. [Open source](https://github.com/nicething/rc-insights).*
+## Testing Multiple LLMs Against the Same Data
+
+I connected rc-insights to five LLM providers and ran them against the same Dark Noise data. The results were revealing:
+
+| Model | Top Recommendation | Depth |
+|-------|-------------------|-------|
+| Groq Llama 70B | "Add ASMR tracks" | Feature-level |
+| Gemini Flash | "Address Feb revenue drop" | Metric-level |
+| DeepSeek | "Win-back campaign" | Tactic-level |
+| Gemini Pro | "Cancellation flow" | Process-level |
+| Rule Engine | "Shift to annual pricing" | Root-cause structural |
+
+The cheaper/faster models gave surface-level advice. The more capable models — and the hand-crafted rule engine — identified the root cause: monthly subscribers re-evaluate every 30 days, and a utility app has no reason to keep them past Month 2.
+
+**Takeaway**: LLMs are good at generating app-specific action steps with dollar estimates. But strategic framing — the "why behind the what" — still comes from domain expertise encoded in rules. The best system combines both.
+
+---
+
+## The Missing API: `/v2/benchmarks`
+
+The single highest-value API addition RevenueCat could make.
+
+Right now, I hardcode SOSA 2026 benchmarks (trial conversion median: 35%, churn median: 6%). But RevenueCat has **115,000 apps and $16B+ in tracked revenue**. That data — anonymized, aggregated by category, price tier, and MRR band — would turn every tool built on the Charts API into a competitive intelligence platform.
+
+"Your churn is 6.7%" becomes "Your churn is 6.7% — Sound/Sleep apps in the $4K–6K MRR band average 4.2%. Here's what the top 10% do differently."
+
+Only RevenueCat has this data. No competitor can replicate it. It would be the deepest moat in subscription analytics.
+
+---
+
+## What I'd Do Differently
+
+If I started over, I'd write less code and more words. The five-line Executive Summary is the entire product — everything else is supporting infrastructure. I'd spend the first four hours on a clean 500-line CLI that produces those five lines, then spend the remaining time writing the best Blog post I could about what I learned building it.
+
+The best Developer Advocate content doesn't say "look what I built." It says "here's what I learned, and you can use this too."
+
+---
+
+*rc-insights is [open source](https://github.com/nicething/rc-insights). Built with Bun + TypeScript against the RevenueCat Charts API v2, tested with real production data from [Dark Noise](https://darknoise.app/).*
