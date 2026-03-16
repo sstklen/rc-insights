@@ -8,8 +8,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod/v3";
 import { runHealthCheck } from "../analysis/health-check.ts";
 import type { HealthReport } from "../api/types.ts";
-import { setLocale } from "../i18n/index.ts";
-import type { Locale } from "../i18n/index.ts";
+// i18n 不在 MCP 層使用 — MCP 回傳結構化 JSON，語言渲染交給客戶端
+// 如果未來 MCP tool 需要回傳已渲染文字，再引入 setLocale + Locale
 
 /** 版本號（與 CLI 同步） */
 const VERSION = "1.0.0";
@@ -153,10 +153,9 @@ export async function startMCPServer(): Promise<void> {
     analyzeInputSchema,
     async (args) => {
       try {
-        // 設定語系（如果有指定）
-        if (args.lang) {
-          setLocale(args.lang as Locale);
-        }
+        // MCP 回傳結構化 JSON 數據，不需要 i18n 渲染。
+        // lang 參數保留在 schema 供未來擴充（如回傳已渲染文字時使用），
+        // 但不改全域 locale — 避免併發請求交叉污染。
         const report = await getReport(args.apiKey, args.projectId);
 
         const result = {

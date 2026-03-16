@@ -7,7 +7,7 @@
 import { runHealthCheck } from "../analysis/health-check.ts";
 import { renderHtmlReport } from "../reports/html.ts";
 import { renderMarkdownReport } from "../reports/markdown.ts";
-import { setLocale } from "../i18n/index.ts";
+import { setLocale, getLocale } from "../i18n/index.ts";
 import type { Locale } from "../i18n/index.ts";
 import type { HealthReport } from "../api/types.ts";
 import { buildAgentCard } from "../a2a/agent-card.ts";
@@ -144,13 +144,21 @@ async function runAnalysis(
   projectId?: string,
   lang?: string,
 ): Promise<HealthReport> {
-  // 設定語系（預設 en）
+  // 設定語系（預設 en）— 保存/恢復以減少併發風險
+  // 注意：這不是完全併發安全的（全域 mutable state），
+  // 但 HTTP serve 是相對低併發場景，v1 可接受。
+  // 完整修法需要 AsyncLocalStorage 或將 locale 參數化到 render 層。
+  const prevLocale = getLocale();
   const locale = lang ?? "en";
   if (["en", "zh", "ja"].includes(locale)) {
     setLocale(locale as Locale);
   }
 
-  return await runHealthCheck(apiKey, projectId);
+  try {
+    return await runHealthCheck(apiKey, projectId);
+  } finally {
+    setLocale(prevLocale);
+  }
 }
 
 /** 路由處理 */
