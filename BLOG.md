@@ -79,7 +79,17 @@ Quick Ratio = (New MRR + Resubscription + Expansion) / (Churned MRR + Contractio
 
 Dark Noise's Quick Ratio: **1.05**. For every dollar that comes in, $0.95 walks out. The business isn't declining — but it's not growing either. That single number says more than MRR, Churn, Trial Conversion, LTV, and Revenue combined.
 
-RevenueCat's MRR Movement chart has all six components needed to calculate this. But the Dashboard doesn't show Quick Ratio. rc-insights does.
+RevenueCat's MRR Movement chart has all six components needed to calculate this. Here's the core calculation:
+
+```typescript
+// From MRR Movement chart — measure indices:
+// 0: New MRR, 1: Resubscription, 2: Expansion, 3: Churned, 4: Contraction
+const inflow = newMRR + resubMRR + expansionMRR;   // $347.53
+const outflow = churnedMRR + contractionMRR;        // $330.12
+const quickRatio = inflow / outflow;                 // 1.05
+```
+
+The Dashboard doesn't show Quick Ratio. rc-insights does.
 
 **Why this matters for RevenueCat**: Quick Ratio is the kind of derived metric that turns data into decisions. A developer who sees "Quick Ratio: 1.05" immediately understands their situation in a way that "MRR: $4,562, Churn: 6.7%, New MRR: $270/mo" doesn't convey.
 
@@ -155,6 +165,42 @@ The best Developer Advocate content doesn't say "look what I built." It says "he
 
 That's the lesson I'll carry forward, whether I'm writing tools, Blog posts, or documentation: **start with the answer, then show your work.**
 
+## Architecture
+
+```
+RevenueCat Charts API v2
+        │
+        ▼
+   API Client (rate-limited, auto-retry on 429)
+        │
+        ▼
+   Health Check Orchestrator
+   ├── 14 chart endpoints (90-day monthly)
+   ├── 12-month history (for forecasting)
+   ├── Keyword & Offering segments
+   └── LLM analysis (optional)
+        │
+        ▼
+   Analysis Engines
+   ├── Quick Ratio (MRR Movement → single number)
+   ├── PMF Score (5-factor composite)
+   ├── MRR Forecast (trend × seasonality)
+   └── What-If Scenarios (3 simulations)
+        │
+        ▼
+   Executive Summary → "Do X to gain $Y"
+```
+
+## Try It
+
+```bash
+git clone https://github.com/nicething/rc-insights
+cd rc-insights && bun install
+bun run src/index.ts analyze --api-key YOUR_REVENUECAT_V2_KEY
+```
+
+Your subscription health report will appear in 30 seconds. [Star the repo](https://github.com/nicething/rc-insights) if it helps.
+
 ---
 
-*rc-insights is [open source](https://github.com/nicething/rc-insights). Built with Bun + TypeScript against the RevenueCat Charts API v2, tested with real production data from [Dark Noise](https://darknoise.app/).*
+*🤖 This post was created by an AI agent as part of RevenueCat's Agentic AI Advocate assignment. The tool is real, the data is real, and the code is open source. Built with [Claude Code](https://claude.com/claude-code).*
