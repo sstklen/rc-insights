@@ -8,7 +8,7 @@ import { calculateQuickRatio, getMultiMeasureTimeSeries } from "../analysis/quic
 import { calculatePMFScore } from "../analysis/pmf-score.ts";
 import { forecastMRR } from "../analysis/mrr-forecast.ts";
 import { runScenarios } from "../analysis/scenario-engine.ts";
-import { generateExecutiveSummary, renderHeadline, renderInsight } from "../analysis/executive-summary.ts";
+import { generateExecutiveSummary, renderHeadline, renderInsight, renderFlywheelLevel } from "../analysis/executive-summary.ts";
 import { linearInterpolate, clamp, weightedAverage, trendSlope } from "../utils/math.ts";
 import { formatCurrency, formatPercent, formatNumber, formatByUnit } from "../utils/formatting.ts";
 import { sumSegmentValues, avgSegmentValues, extractValidSegments } from "../utils/segment.ts";
@@ -267,6 +267,59 @@ describe("Executive Summary", () => {
       anomalies: [],
     });
     expect(summary.keyInsights.length).toBeGreaterThan(0);
+  });
+
+  it("renders headline in Chinese", () => {
+    setLocale("zh");
+    const summary = generateExecutiveSummary({
+      projectName: "Test",
+      metrics: mockMetrics,
+      anomalies: [],
+    });
+    const headline = renderHeadline(summary, "zh");
+    // 中文 headline 應包含中文字元
+    expect(headline).toMatch(/[\u4e00-\u9fff]/);
+    expect(headline).toContain("$4,562");
+    setLocale("en");
+  });
+
+  it("renders headline in Japanese", () => {
+    setLocale("ja");
+    const summary = generateExecutiveSummary({
+      projectName: "Test",
+      metrics: mockMetrics,
+      anomalies: [],
+    });
+    const headline = renderHeadline(summary, "ja");
+    // 日文 headline 應包含日文字元（平假名/片假名/漢字）
+    expect(headline).toMatch(/[\u3000-\u9fff\u30a0-\u30ff]/);
+    setLocale("en");
+  });
+
+  it("renders insights in Chinese", () => {
+    const summary = generateExecutiveSummary({
+      projectName: "Test",
+      metrics: mockMetrics,
+      anomalies: [],
+    });
+    if (summary.keyInsights.length > 0) {
+      const { title, detail } = renderInsight(summary.keyInsights[0]!, "zh");
+      // 中文 insight 應包含中文字元
+      expect(title).toMatch(/[\u4e00-\u9fff]/);
+      expect(detail).toMatch(/[\u4e00-\u9fff]/);
+    }
+  });
+
+  it("renders flywheel level in Japanese", () => {
+    const summary = generateExecutiveSummary({
+      projectName: "Test",
+      metrics: mockMetrics,
+      anomalies: [],
+    });
+    const fw = renderFlywheelLevel(summary, "ja");
+    // 日文飛輪層級
+    expect(fw.label).toMatch(/[\u3000-\u9fff\u30a0-\u30ff]/);
+    expect(fw.nextUnlock).toMatch(/[\u3000-\u9fff\u30a0-\u30ff]/);
   });
 });
 
