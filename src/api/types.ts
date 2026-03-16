@@ -206,10 +206,22 @@ export interface Recommendation {
   relatedMetric: string;
   /** 預期影響 */
   impact: "high" | "medium" | "low";
-  /** 決策後的具體行動（閉環） */
+  /** 戰略行動：改變軌跡的根本動作（為什麼 → 做什麼 → 預期結果） */
+  strategy?: StrategyAction;
+  /** 戰術行動：立即可執行的具體步驟 */
   actions?: ActionStep[];
   /** 驗證方式：做完後怎麼確認有效 */
   verify?: VerifyStep;
+}
+
+/** 戰略行動：解決根因，改變 12 個月軌跡 */
+export interface StrategyAction {
+  /** 根因分析：為什麼會有這個問題 */
+  rootCause: string;
+  /** 戰略方向：要做什麼根本改變 */
+  strategicMove: string;
+  /** 預期 12 個月結果 */
+  expectedOutcome: string;
 }
 
 /** 具體行動步驟 */

@@ -23,6 +23,11 @@ const RECOMMENDATION_TEMPLATES: Record<
       } of apps. Your funnel works — pour more users in.`,
       relatedMetric: "trial_conversion_rate",
       impact: "high",
+      strategy: {
+        rootCause: "Your product-to-paid conversion is proven. The constraint is not the funnel — it's the size of the top of the funnel.",
+        strategicMove: "Expand market reach: enter adjacent search categories, localize for high-LTV geographies (Japan, Germany), and create a free tier to widen the top of funnel 10x.",
+        expectedOutcome: "2-3x trial volume within 6 months while maintaining conversion above 40%.",
+      },
       actions: [
         {
           what: "Increase Apple Search Ads budget by 30% on your top-converting keywords",
@@ -55,6 +60,11 @@ const RECOMMENDATION_TEMPLATES: Record<
       }%. ${KEY_FACTS.day0TrialCancelRate}% of 3-day trial cancellations happen on Day 0 — your onboarding is the bottleneck.`,
       relatedMetric: "trial_conversion_rate",
       impact: "high",
+      strategy: {
+        rootCause: "Users start the trial but don't experience enough value to justify paying. The product's core value proposition isn't landing within the trial window.",
+        strategicMove: "Redesign the first-run experience around a single 'aha moment'. The user must feel the product's value within 60 seconds — before they close the app and forget about it.",
+        expectedOutcome: "Trial conversion above median (35%) within 2 months, compounding into 20-40% more MRR.",
+      },
       actions: [
         {
           what: "Review your onboarding flow — users must see core value within 60 seconds of first launch",
@@ -84,6 +94,11 @@ const RECOMMENDATION_TEMPLATES: Record<
       description: `Trial conversion rate is only ${m.value.toFixed(1)}%. For every 100 trials, only ${Math.round(m.value)} convert. This is the highest-leverage fix available.`,
       relatedMetric: "trial_conversion_rate",
       impact: "high",
+      strategy: {
+        rootCause: "Users don't see enough value to pay. Either the product doesn't solve their problem, or the paywall appears before they understand why they need it.",
+        strategicMove: "Question the paywall timing: offer a meaningful free tier that lets users build a habit, THEN introduce the paywall when they've experienced value. The paywall should feel like an upgrade, not a gate.",
+        expectedOutcome: "Conversion may initially drop (more free users) but total paying users increases because the funnel is 5-10x wider.",
+      },
       actions: [
         {
           what: "Audit trial onboarding: does the user see core value before Day 0 ends?",
@@ -142,6 +157,11 @@ const RECOMMENDATION_TEMPLATES: Record<
       description: `Monthly churn of ${m.value.toFixed(1)}% is above 5%. Every 1% churn reduction compounds to ~12% more revenue annually.`,
       relatedMetric: "churn",
       impact: "medium",
+      strategy: {
+        rootCause: "Monthly subscribers re-evaluate every 30 days. If your product delivers all its value on Day 1 (e.g., a utility app), there's no compelling reason to stay past Month 2.",
+        strategicMove: "Shift to annual-first pricing (monthly still available but not prominent). Annual users bypass 11 monthly churn decision points. Simultaneously, build cumulative value — usage history, preferences, saved data — that creates switching costs.",
+        expectedOutcome: "Annual subscriber ratio from ~20% to 50%+ within 6 months. Effective churn drops 40-60% because annual users churn at 1/3 the rate.",
+      },
       actions: [
         {
           what: "Check Subscription Status chart for 'Billing Issue' count — involuntary churn is often 20-40% of total and fixable",
@@ -177,6 +197,11 @@ const RECOMMENDATION_TEMPLATES: Record<
       description: `Monthly churn rate of ${m.value.toFixed(1)}% is bleeding revenue. At this rate, you lose half your subscribers in ${Math.round(Math.log(0.5) / Math.log(1 - m.value / 100))} months.`,
       relatedMetric: "churn",
       impact: "high",
+      strategy: {
+        rootCause: "Critical churn usually means one of three things: (1) your product doesn't match what users expected when they subscribed, (2) a competitor is pulling users away, or (3) your category has a natural usage ceiling that you've hit.",
+        strategicMove: "Before optimizing retention, diagnose the root cause through a cancellation survey. If it's expectation mismatch → fix positioning. If it's competition → differentiate or acquire. If it's category ceiling → pivot to an adjacent market with higher natural retention.",
+        expectedOutcome: "Correct diagnosis prevents wasting months on the wrong fix. If it's category ceiling, no amount of retention tactics will work — only market expansion changes the trajectory.",
+      },
       actions: [
         {
           what: "Add a cancellation survey (1 question: 'Why are you leaving?') to identify root causes",

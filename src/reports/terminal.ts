@@ -137,7 +137,14 @@ function renderRecommendations(recommendations: Recommendation[], maxCount = 5):
     lines.push(`  ${chalk.bold.white(`${i + 1}.`)} ${chalk.bold(rec.title)} ${impactLabel}`);
     lines.push(`     ${chalk.gray("→")} ${rec.description}`);
 
-    // 行動步驟
+    // 戰略行動
+    if (rec.strategy) {
+      lines.push(`     ${chalk.yellow("⚡ Root cause:")} ${chalk.white(rec.strategy.rootCause)}`);
+      lines.push(`     ${chalk.cyan("⚡ Strategic move:")} ${chalk.bold.white(rec.strategy.strategicMove)}`);
+      lines.push(`     ${chalk.green("⚡ 12-month outcome:")} ${rec.strategy.expectedOutcome}`);
+    }
+
+    // 戰術行動
     if (rec.actions && rec.actions.length > 0) {
       for (const action of rec.actions) {
         const icon = whereIcon[action.where] ?? "▸";
