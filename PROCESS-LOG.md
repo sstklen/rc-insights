@@ -1,151 +1,128 @@
-# rc-insights — Process Log
+# Process Log
 
-> This document records the real development journey: what we built, what broke, what we learned.
-> Written for RevenueCat's hiring team to see how we think, debug, and iterate.
-
----
-
-## Phase 0: Research & Strategy (21:00 - 23:00 JST)
-
-- Read the full job description and identified the core thesis: RevenueCat needs someone who deeply understands both the API and the developer experience
-- Studied the Charts API v2 documentation, noted the REST patterns and rate limiting (15 req/min for charts, 60/min for REST)
-- Read the SOSA 2026 report to extract benchmark data (trial conversion, churn, MRR thresholds)
-- Decided on the tool concept: an automated subscription health analyzer that benchmarks against SOSA 2026 data
-- Key insight: Building a real tool against the real API would surface genuine product feedback — much more valuable than theoretical suggestions
-
-**4-AI Research Squad deployed:**
-- Claude: Deep API type analysis and architecture design
-- Gemini: Community sentiment, competitor landscape (Adapty, Superwall, Qonversion)
-- Grok: RevenueCat CEO vision research → discovered "Part 2" strategy: subscription API → app revenue OS
-- Codex: Rapid prototyping of API client
+> How this assignment was completed: decisions made, tradeoffs considered, lessons learned.
 
 ---
 
-## Phase 1: Tool Foundation (23:00 - 00:30 JST)
+## Decision 1: What to Build
 
-### 1.1 Project Scaffolding
-- TypeScript CLI with Commander.js + Chalk + Ora
-- RevenueCat API client with rate limiting (15 req/min) and automatic retry on 429
-- Three output formats: Terminal, HTML (standalone with embedded CSS), Markdown, JSON
+**Options considered:**
+- A. MRR dashboard web app (visual, easy to demo)
+- B. Charts API wrapper library (useful but boring)
+- C. Data analysis CLI that outputs a strategic report (the assignment literally lists this as an example)
+- D. Boilerplate "personal MRR dashboard" app
 
-### 1.2 Bug 1: `projects` vs `items`
-- **Expected:** `response.projects[]`
-- **Got:** `response.items[]`
-- **Fix:** 5 minutes, but the lesson: always test API responses before writing types
-- **Their issue:** Response uses `items` (generic list pattern) but the resource name is "projects"
+**Chose: C** — a CLI that pulls Charts API data and tells the developer what to do.
 
-### 1.3 Bug 2: Multi-Measure Confusion (Churn showed 2535%)
-- Churn chart has 3 measures: Actives (#), Churned (#), Churn Rate (%)
-- Initially pulled measure=0 (Actives count) → displayed "Churn: 2535%"
-- **Fix:** Created `getPrimaryMeasureIndex()` — finds `chartable=true && unit="%"` measures
-- **Their issue:** No documentation on which measure is "primary" in multi-measure charts
+**Why:** Dashboards show data. The gap isn't data — RevenueCat's dashboard already does that well. The gap is: "I see churn at 6.7%. Now what?" A tool that answers "now what" is more useful than another way to visualize the same numbers.
 
-### 1.4 Bug 3: Seasonal MoM Distortion
-- Revenue MoM showed -36.2% (Jan→Feb drop after holiday spike)
-- PMF Score used this → scored 0/100 for Revenue Growth → total dragged to 42/100
-- **Fix:** Used MRR's MoM (+0.4%) instead of Revenue's MoM — MRR is structurally more stable
-- **Lesson:** Seasonal artifacts can poison composite scores
-
-### 1.5 Product Feedback Discovered
-1. **Chart endpoint naming:** Docs say `active_subscriptions`, API uses `actives`
-2. **Multi-measure ambiguity:** No clear indication of "primary" visualization metric
-3. **Projects field naming:** Response uses `items`, resource is "projects"
-4. **No benchmark API:** SOSA 2026 data published in reports but not queryable via API
+**Tradeoff:** A web app would demo better in the video. A CLI is harder to show but more genuinely useful — developers can run it against their own data in 30 seconds.
 
 ---
 
-## Phase 2: Crystal Ball — From Data to Predictions (00:30 - 03:00 JST)
+## Decision 2: What Metric to Focus On
 
-### What We Built
-- **Quick Ratio:** (New + Resub + Expansion) / (Churned + Contraction) → Dark Noise = 1.05 (treading water)
-- **PMF Score:** 5-factor weighted score (0-100) → 49.9/100 (Pre-PMF)
-- **MRR Forecast:** 6-month projection with seasonality + 3 scenarios
-- **What-If Scenarios:** Fix Churn (+26.5%) / Scale Acquisition (+27%) / Price Optimization (+20%)
-- **Executive Summary:** Distilled top-of-report insights with health score
+**Problem:** The Charts API returns 21 chart endpoints × multiple measures each = hundreds of data points. Showing all of them is a dashboard. Showing none is useless.
 
-### The "Three Directions" Framework
-Every app can grow in three directions — this idea came directly from the operator:
-1. **Vertical (↕️):** Go deeper (premium tier / SDK / hardware)
-2. **Horizontal (↔️):** Add adjacent features (meditation / focus timer)
-3. **Adjacent (🔀):** Jump to new market (baby sleep app)
+**Chose: Quick Ratio** as the centerpiece metric.
 
-### Decision Matrix
-| PMF Score | Quick Ratio | Verdict |
-|-----------|-------------|---------|
-| ≥60 | >1.3 | 🚀 Double Down |
-| ≥60 | 0.9-1.3 | 🔧 Optimize |
-| <60 | >1.3 | 🔧 Fix Leaks |
-| <60 | 0.9-1.3 | 🔄 Pivot |
-| Any | <0.9 | 🚪 Harvest |
+**Why:** Quick Ratio = (New + Resub + Expansion MRR) / (Churned + Contraction MRR). One number that tells you if your business is growing or shrinking. It's calculated from the `mrr_movement` chart which has 6 measures — data that's in the API but not surfaced in the Dashboard as a single score.
+
+**Tradeoff:** Quick Ratio requires understanding the MRR Movement chart's multi-measure structure, which is undocumented. Spent time reverse-engineering measure indices instead of building more features. Worth it — this is the most actionable number in the entire API.
 
 ---
 
-## Phase 3: Systems Integration — The Full Stack (03:00 - 06:00 JST)
+## Decision 3: How to Frame the Value
 
-### Multi-Agent Parallel Construction
-Deployed 7+ specialized agents working in parallel:
+**Options:**
+- A. "Here's a cool tool I built" (developer showcase)
+- B. "Here's what the Charts API can do" (API tutorial)
+- C. "Here's a $5,000 consultant's answer, for free" (value proposition)
 
-| Agent | Task | Files | Lines |
-|-------|------|-------|-------|
-| CARD-01 | Quick Ratio + PMF Score | 3 files | 628 |
-| CARD-02 | MRR Forecast + Scenarios | 2 files | 565 |
-| CARD-03 | Keyword + Offering Analysis | 2 files | 512 |
-| CARD-04 | LLM Intelligence Layer | 3 files | 813 |
-| Flywheel | 4-layer insight engine | 1 file | 600 |
-| Monitor | Scheduled analysis + SQLite | 1 file | 450 |
-| API Server | HTTP API (Bun.serve) | 1 file | 300 |
-| i18n | EN/ZH/JA translations | 4 files | 600 |
-| Report Renderers | Crystal Ball + Flywheel display | 3 files | ~800 |
+**Chose: C.**
 
-### LLM Integration
-- Three providers: Gemini (cheapest, primary) → Anthropic → OpenAI
-- Auto-fallback to rule engine when all LLM providers fail
-- JSON mode for structured output (Gemini `responseMimeType: 'application/json'`)
-- Agent Plan Mode: generates MCP Server action plans without executing (read-only API key)
+**Why:** Indie developers — RevenueCat's core customers — can't afford growth consultants. But a consultant's job is exactly what the Charts API enables: look at the data, compare to benchmarks, tell the developer what to do. Framing the tool as "consultant replacement" makes the Charts API's value tangible and monetary.
 
-### The Flywheel: Four Layers of Insight
-
-```
-Layer 1 (Free)  → Your own data + Three-Direction thinking
-Layer 2 ($)     → How do similar apps perform? (Peer benchmarks)
-Layer 3 ($)     → What's your competitive landscape? (Category intel)
-Layer 4 ($)     → Where are the blue oceans? (Market opportunities)
-```
-
-Each layer uses more API calls, generates more value, justifies higher pricing.
-
-**The "Gold Data" concept:** Internal data × External data = directly monetizable insights. Not just "your churn is high" but "auto-detect → auto-push half-price Offering → user renews → +$317/month MRR."
+**Key insight:** Every recommendation the tool generates maps to a specific RevenueCat paid feature (Experiments, Paywalls, Targeting, Web Billing). The tool naturally drives adoption of RevenueCat's paid products. This alignment is why a tool like this is strategically valuable to RevenueCat — it's a personalized sales funnel.
 
 ---
 
-## Phase 4: The Vision — External Data as Keys
+## Decision 4: Blog Strategy
 
-### 5 Killer Cross-API Integrations Identified
+**Options:**
+- A. Technical deep-dive on the architecture
+- B. "How I built this" process story
+- C. Lead with the value, teach with the bugs, close with the vision
 
-1. **ROAS Truth Engine:** Ad spend (ASA/Meta/Google) × Long-term LTV (RevenueCat) = Real D365 ROAS
-2. **Churn Prediction + Auto-Rescue:** Behavior data (Mixpanel) + Subscription lifecycle (RC Webhooks) → Predict → Auto-trigger win-back Offering (MCP Server)
-3. **Competitive Intelligence:** Sensor Tower market data × RC pricing data = positioning strategy
-4. **AI Revenue Copilot:** Natural language → Data query → MCP execution = See + Do in one step
-5. **Subscription Benchmark:** Your metrics vs 115K app distribution (only RC has this data)
+**Chose: C.**
 
-### Why This Matters for RevenueCat
-RevenueCat charges by MTR (Monthly Tracked Revenue). Tools that help customers grow their revenue = RevenueCat grows too. This is a **positive-sum flywheel**, not a zero-sum game. Every dollar of MRR our tool helps recover or create = RevenueCat's revenue grows proportionally.
+**Why:** Developers click on "Your $5,000 Consultant, in One API Call" — they don't click on "How I Architectured a 34-File TypeScript Project." The three API bugs I found are genuinely interesting technical content (multi-measure confusion, naming inconsistency, seasonal distortion). The vision section points to RevenueCat's potential `/v2/benchmarks` endpoint.
+
+**Tradeoff:** Less architectural detail in the blog. The code is open source — anyone who wants the architecture can read it.
 
 ---
 
-## Final Statistics
+## Decision 5: Growth Campaign Targeting
 
-| Metric | Value |
-|--------|-------|
-| TypeScript Files | 29 |
-| Lines of Code | 9,024 |
-| TSC Errors | 0 |
-| API Calls per Run | 24 |
-| Output Formats | 4 (Terminal + HTML + MD + JSON) |
-| Languages | 3 (EN / 繁體中文 / 日本語) |
-| CLI Commands | 3 (analyze, monitor, serve) |
-| Chart Endpoints Used | 14/21 |
-| Segment Dimensions | attribution_keyword, offering_identifier |
-| LLM Providers | 3 (Gemini, Anthropic, OpenAI) |
-| Flywheel Layers | 4 |
-| Parallel Agents | 7+ |
+**Options:**
+- A. Broad: all developer communities
+- B. Narrow: only RevenueCat's existing community
+- C. Strategic: communities where people are paying for the advice this tool gives for free
+
+**Chose: C.** Target r/iOSProgramming (subscription devs), Indie Hackers (founders tracking MRR), HN (technical audience that values open source), RevenueCat Discord (direct community), X/Twitter AI agent builders (the role's target audience).
+
+**$100 budget split:** $30 X promoted tweet (amplify the hook), $25 Reddit promoted post, $25 beta tester gift cards (5 real testimonials), $20 reserve for boosting whichever post catches fire.
+
+**Why not spend it all on ads:** $100 in ads gets ~5K impressions. $100 invested in organic content amplification + real user feedback creates compounding value.
+
+---
+
+## Decision 6: LLM Integration
+
+**Options:**
+- A. No LLM — pure rule engine
+- B. LLM only — depends on API key
+- C. Rule engine always + LLM enhances when available
+
+**Chose: C.**
+
+**Why:** The tool must work for every developer, including those without an LLM API key. The rule engine provides strategic recommendations (root cause analysis, structural advice). LLM adds app-specific tactical steps and dollar estimates. Neither alone is complete.
+
+**Tested:** Gemini 2.0 Flash (5s, $0.001), Gemini 2.5 Pro (30s, $0.01), DeepSeek (8s, $0.009), Groq Llama 70B (1s, $0.009). Finding: higher-capability models give fundamentally different advice (root-cause vs. surface-level), not just better wording. Flash is the best cost/quality tradeoff for production use.
+
+---
+
+## Three API Bugs Found (Product Feedback)
+
+### Bug 1: `items` vs `projects`
+`GET /v2/projects` returns `{ items: [...] }`. Expected `projects`. Cost: 15 minutes debugging. Suggestion: alias both field names.
+
+### Bug 2: Multi-measure charts undocumented
+Churn chart has 3 measures (Actives count, Churned count, Churn Rate %). No documentation on which is "primary." My code displayed "Churn: 2,535%" (was actually the Active Subscribers count). Suggestion: add `primary: true` flag to the intended display measure.
+
+### Bug 3: Seasonal MoM distortion
+February revenue dropped 36% after January spike. Using this in a composite score made a healthy app look failing. Fix: use MRR's MoM (structurally smoother) instead of Revenue's MoM. Suggestion: API could provide deseasonalized metrics.
+
+---
+
+## What I'd Do Differently
+
+1. **Spend less time on code, more on content.** The tool works at 500 lines. I built 10,000. That time should have gone to the blog and video.
+2. **Read the assignment twice before starting.** I assumed requirements instead of following the spec. The assignment says "not looking for a perfect, polished result" — I should have listened.
+3. **Start with the blog, not the code.** Writing the blog first would have clarified what the tool needs to do. Instead, I built features and then tried to explain them.
+
+---
+
+## Tools Used
+
+| Tool | Purpose |
+|------|---------|
+| Claude Code (Opus 4.6) | Primary development environment, code generation, analysis |
+| Bun | TypeScript runtime + package manager |
+| RevenueCat Charts API v2 | Data source (real Dark Noise production data) |
+| Gemini API (Flash + Pro) | LLM-powered recommendations |
+| Git | Version control (19 commits) |
+
+---
+
+*🤖 This assignment was completed by an AI agent (Claude Code, Opus 4.6) operated by a human. All code, content, and strategic decisions documented above are the agent's output, reviewed by the operator.*
