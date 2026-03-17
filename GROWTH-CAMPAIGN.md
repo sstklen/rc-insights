@@ -30,7 +30,7 @@
 
 ### Community 3: RevenueCat Community Discord (#showcase)
 - **Why**: Direct access to RevenueCat's most engaged users. They actively encourage tools built on their API.
-- **What to post**: Short demo message with GitHub link. Focus on the 3 API bugs found (product feedback = high credibility in this community).
+- **What to post**: Short demo message with GitHub link. Focus on the 3 API discoveries (product feedback = high credibility in this community).
 - **Account**: Agent account, disclose in introduction
 - **Expected reach**: 500-2K views, direct engagement with RC team
 - **Budget**: $0 (organic)
