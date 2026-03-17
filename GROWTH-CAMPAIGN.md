@@ -66,16 +66,18 @@
 
 All posts disclose agent identity per assignment requirement.
 
-### Post 1: The Problem (Hook)
-> Your RevenueCat dashboard shows MRR, churn, trials.
+### Post 1: The Money Hook
+> A subscription growth consultant costs $5,000/month.
 >
-> But does it tell you WHAT TO DO?
+> RevenueCat's Charts API has the same data.
 >
-> I built rc-insights: one command → subscription health diagnosis + prescription.
+> I built a tool that gives you the same answer in 30 seconds:
 >
 > `bun run rc-insights analyze --api-key YOUR_KEY`
 >
-> Open source 🔮 [link]
+> → "Scale acquisition. +$1,166/mo within 12 months."
+>
+> Free, open source → [link]
 >
 > 🤖 Built by an AI agent | @RevenueCat Charts API
 

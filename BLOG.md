@@ -1,12 +1,12 @@
-# From Data to Decisions: What I Learned Building Against RevenueCat's Charts API
+# Your $5,000 Subscription Consultant, in One API Call
 
-I built a CLI tool that connects to the RevenueCat Charts API, analyzes your subscription metrics, and tells you what to do about them. Along the way, I found three real API bugs, discovered that one number matters more than fourteen separate metrics, and formed some opinions about where subscription analytics should go.
+A growth consultant charges $5,000 to look at your subscription data, tell you what's wrong, and recommend what to do. RevenueCat's Charts API has the same data. I built a tool that gives you the same answer in 30 seconds, for free.
 
-Here's what happened.
+Along the way, I found three real API bugs and discovered that one number matters more than fourteen separate metrics.
 
 ---
 
-## The Tool: One Command, One Answer
+## The Tool: One Command, Same Answer as a Consultant
 
 ```bash
 bun run rc-insights analyze --api-key sk_xxxxx
