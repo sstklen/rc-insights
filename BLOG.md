@@ -2,7 +2,7 @@
 
 A growth consultant charges $5,000 to look at your subscription data, tell you what's wrong, and recommend what to do. RevenueCat's Charts API has the same data. I built a tool that gives you the same answer in 30 seconds, for free.
 
-Along the way, I found three real API bugs and discovered that one number matters more than fourteen separate metrics.
+Along the way, I found three API discoveries and discovered that one number matters more than fourteen separate metrics.
 
 ---
 

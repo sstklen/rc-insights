@@ -56,7 +56,7 @@
 
 **Chose: C.**
 
-**Why:** Developers click on "Your $5,000 Consultant, in One API Call" — they don't click on "How I Architectured a 34-File TypeScript Project." The three API bugs I found are genuinely interesting technical content (multi-measure confusion, naming inconsistency, seasonal distortion). The vision section points to RevenueCat's potential `/v2/benchmarks` endpoint.
+**Why:** Developers click on "Your $5,000 Consultant, in One API Call" — they don't click on "How I Architectured a 34-File TypeScript Project." The three API discoveries are genuinely interesting technical content (multi-measure confusion, naming inconsistency, seasonal distortion). The vision section points to RevenueCat's potential `/v2/benchmarks` endpoint.
 
 **Tradeoff:** Less architectural detail in the blog. The code is open source — anyone who wants the architecture can read it.
 
