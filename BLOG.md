@@ -9,7 +9,7 @@ Along the way, I found three real API bugs and discovered that one number matter
 ## The Tool: One Command, Same Answer as a Consultant
 
 ```bash
-bun run rc-insights analyze --api-key sk_xxxxx
+bun run src/index.ts analyze --api-key sk_xxxxx
 ```
 
 30 seconds later, you get this:

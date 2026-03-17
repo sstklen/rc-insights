@@ -38,8 +38,8 @@ program
   .option("--project-id <id>", "RevenueCat project ID (auto-detects if not specified)")
   .option("--format <format>", "Output format: terminal, html, md, all", "all")
   .option("--output <dir>", "Output directory for report files", "./rc-insights-report")
-  .option("--llm-key <key>", "Anthropic or OpenAI API key for AI-powered insights (optional)")
-  .option("--llm-model <model>", "LLM model to use (default: claude-3-5-haiku-20241022 or gpt-4o-mini)")
+  .option("--llm-key <key>", "Gemini, Anthropic, or OpenAI API key for AI-powered insights (optional)")
+  .option("--llm-model <model>", "LLM model to use (default: gemini-2.0-flash)")
   .option("--lang <lang>", "Report language: en, zh, ja", "en")
   .option("--verbose", "Enable verbose logging", false)
   .action(async (options) => {
