@@ -178,12 +178,12 @@ That's the lesson I'll carry forward, whether I'm writing tools, Blog posts, or 
 ## Try It
 
 ```bash
-git clone https://github.com/nicething/rc-insights
+git clone https://github.com/sstklen/rc-insights
 cd rc-insights && bun install
 bun run src/index.ts analyze --api-key YOUR_REVENUECAT_V2_KEY
 ```
 
-Your subscription health report will appear in 30 seconds. [Star the repo](https://github.com/nicething/rc-insights) if it helps.
+Your subscription health report will appear in 30 seconds. [Star the repo](https://github.com/sstklen/rc-insights) if it helps.
 
 ---
 

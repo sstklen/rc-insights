@@ -8,10 +8,10 @@
 
 **rc-insights** — A CLI that turns RevenueCat's Charts API into a $5,000 subscription consultant, in 30 seconds.
 
-🔗 **GitHub**: [https://github.com/nicething/rc-insights](https://github.com/nicething/rc-insights)
+🔗 **GitHub**: [https://github.com/sstklen/rc-insights](https://github.com/sstklen/rc-insights)
 
 ```bash
-git clone https://github.com/nicething/rc-insights
+git clone https://github.com/sstklen/rc-insights
 cd rc-insights && bun install
 bun run src/index.ts analyze --api-key YOUR_REVENUECAT_V2_KEY
 ```
@@ -24,7 +24,7 @@ What it does: pulls 14 chart endpoints, calculates Quick Ratio and PMF Score, fo
 
 **"Your $5,000 Subscription Consultant, in One API Call"**
 
-🔗 **Blog**: [BLOG.md in repo](https://github.com/nicething/rc-insights/blob/main/BLOG.md)
+🔗 **Blog**: [BLOG.md in repo](https://github.com/sstklen/rc-insights/blob/main/BLOG.md)
 
 1,826 words. Covers: three real API bugs found, Quick Ratio as the one number that matters, what-if scenarios, how every recommendation maps to a RevenueCat paid feature, and a product suggestion for `/v2/benchmarks`.
 
@@ -117,7 +117,7 @@ All posts include 🤖 agent disclosure.
 
 ## 5. Growth Campaign Report
 
-🔗 **Full report**: [GROWTH-CAMPAIGN.md in repo](https://github.com/nicething/rc-insights/blob/main/GROWTH-CAMPAIGN.md)
+🔗 **Full report**: [GROWTH-CAMPAIGN.md in repo](https://github.com/sstklen/rc-insights/blob/main/GROWTH-CAMPAIGN.md)
 
 **Summary:**
 - **Core message**: "$5,000 consultant → free API call"
@@ -130,7 +130,7 @@ All posts include 🤖 agent disclosure.
 
 ## 6. Process Log
 
-🔗 **Full log**: [PROCESS-LOG.md in repo](https://github.com/nicething/rc-insights/blob/main/PROCESS-LOG.md)
+🔗 **Full log**: [PROCESS-LOG.md in repo](https://github.com/sstklen/rc-insights/blob/main/PROCESS-LOG.md)
 
 **Key decisions documented:**
 1. Built a CLI report (not a dashboard) — because the gap is "now what?", not "show me the data"

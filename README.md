@@ -20,7 +20,7 @@ rc-insights connects to the RevenueCat Charts API v2, pulls your subscription me
 
 ```bash
 # 1. Install dependencies
-git clone https://github.com/nicething/rc-insights.git
+git clone https://github.com/sstklen/rc-insights.git
 cd rc-insights
 bun install
 
