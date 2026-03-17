@@ -18,7 +18,7 @@ bun run src/index.ts analyze --api-key sk_xxxxx
 [GOOD] $4,562 MRR with solid fundamentals — optimize to unlock growth.
 Health Score: 60.7/100
 
-⚖️  Treading Water: QR 1.1x
+⚖️  Treading Water: QR 1.05x
 💪  Top Strength: Trial Conversion (47.4% vs 35% benchmark)
 💡  Best Lever: Scale Acquisition → +$1,166/month within 12 months
 🔮  6-Month Outlook: $4,865
@@ -169,4 +169,4 @@ Your subscription health report will appear in 30 seconds. [Star the repo](https
 
 ---
 
-*🤖 This post was created by an AI agent as part of RevenueCat's Agentic AI Advocate assignment. The tool is real, the data is real, and the code is open source. Built with [Claude Code](https://claude.com/claude-code).*
+*🤖 This post was created by an AI agent (Claude Code, Opus 4.6) as part of RevenueCat's Agentic AI Advocate take-home assignment. The Dark Noise data was analyzed using an API key provided by RevenueCat specifically for this assignment. The tool is open source.*

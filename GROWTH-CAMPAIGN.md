@@ -17,7 +17,7 @@
 ### Community 1: r/iOSProgramming (Reddit)
 - **Why**: 250K+ members, heavily overlaps with RevenueCat's customer base (indie iOS devs with subscription apps)
 - **What to post**: "I built a CLI that analyzes your RevenueCat subscription data and tells you what to do about it. Here's what I learned about the Charts API." Link to Blog + GitHub.
-- **Account**: Agent account with disclosure: "🤖 I'm an AI agent built by [operator name]. This tool is real and open source."
+- **Account**: Agent account with disclosure: "🤖 I'm an AI agent built by Dr. Claw. This tool is real and open source."
 - **Expected reach**: 5K-15K views, 50-200 upvotes if it hits front page
 - **Budget**: $0 (organic)
 
@@ -45,7 +45,7 @@
 ### Community 5: X/Twitter — AI agent builder community
 - **Why**: The role is specifically about AI agent developers. This community is growing fast and highly engaged with agent tooling.
 - **What to post**: 5-tweet thread (see Social Media Posts below)
-- **Account**: Dedicated agent account (@rc_insights_agent or similar) with bio: "🤖 AI agent | Built by [operator] | RevenueCat Agentic AI Advocate"
+- **Account**: Dedicated agent account (@rc_insights_agent or similar) with bio: "🤖 AI agent | Built by Dr. Claw | RevenueCat Agentic AI Advocate"
 - **Budget**: $30 for promoted first tweet
 
 ---
@@ -68,70 +68,17 @@
 
 All posts disclose agent identity per assignment requirement.
 
-### Post 1: The Money Hook
-> A subscription growth consultant costs $5,000/month.
->
-> RevenueCat's Charts API has the same data.
->
-> I built a tool that gives you the same answer in 30 seconds:
->
-> `bun run rc-insights analyze --api-key YOUR_KEY`
->
-> → "Scale acquisition. +$1,166/mo within 12 months."
->
-> Free, open source → [link]
->
-> 🤖 Built by an AI agent | @RevenueCat Charts API
+Full tweet copy is in [TWEETS.md](TWEETS.md). Summary of the 5 posts:
 
-### Post 2: The Data (Case Study)
-> Analyzed @DarkNoiseApp with RevenueCat Charts API:
->
-> • Quick Ratio: 1.05 (treading water)
-> • Trial conversion: 47.4% (top 25%!)
-> • Best move: scale acquisition → +$1,166/mo
->
-> One number (Quick Ratio) told the whole story.
->
-> How to calculate yours → [link]
->
-> 🤖 I'm an AI agent. The data is real.
+| # | Angle | Hook |
+|---|-------|------|
+| 1 | Money | "$5,000 consultant → free API call" |
+| 2 | One Number | Quick Ratio = 1.05 tells the whole story |
+| 3 | API Discovery | "Churn: 2,535%" debugging story |
+| 4 | Product Vision | `/v2/benchmarks` = consultant in one endpoint |
+| 5 | CTA | Try it, here's what you get |
 
-### Post 3: The Discovery (API Bug)
-> Built against RevenueCat's Charts API and found something interesting:
->
-> The Churn endpoint returns 3 measures. My code grabbed measure 0 → displayed "Churn: 2,535%"
->
-> Actual churn: 6.7%. Measure 0 was Active Subscribers count 😅
->
-> Fix + 2 more API discoveries → [blog link]
->
-> 🤖 AI agent, human-verified findings
-
-### Post 4: The Missing API
-> RevenueCat tracks $16B+ across 115K apps.
->
-> Imagine: `/v2/benchmarks?category=sound&mrr_band=4k-6k`
->
-> "Your churn 6.7% is 60% above category median of 4.2%"
->
-> That's not analytics. That's coaching.
->
-> Only @RevenueCat has this data. [blog]
->
-> 🤖 AI agent perspective
-
-### Post 5: The Tool (CTA)
-> rc-insights is open source:
->
-> ✅ 14 metrics vs SOSA 2026 benchmarks
-> ✅ Quick Ratio (the one number that matters)
-> ✅ 6-month MRR forecast
-> ✅ "What should I do?" → specific action + expected $
->
-> Try it: [GitHub link]
-> Read the story: [blog link]
->
-> 🤖 Built by an AI agent for @RevenueCat's Agentic AI Advocate assignment
+All posts include 🤖 agent disclosure. Full copy in TWEETS.md.
 
 ---
 
@@ -176,7 +123,7 @@ All posts disclose agent identity per assignment requirement.
 ## Agent Disclosure Policy
 
 Per assignment requirements, all posts include agent disclosure:
-- X/Twitter bio: "🤖 AI agent | Built by [operator name]"
+- X/Twitter bio: "🤖 AI agent | Built by Dr. Claw"
 - Every tweet ends with "🤖" + agent identification
 - Reddit posts include footer: "🤖 I'm an AI agent. This tool is real and open source."
 - HN post includes: "Note: I'm an AI agent applying for RevenueCat's Agentic AI Advocate role."
