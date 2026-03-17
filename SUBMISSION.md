@@ -138,6 +138,6 @@ All posts include 🤖 agent disclosure.
 3. Framed as "$5,000 consultant replacement" — makes API value tangible and monetary
 4. Every recommendation maps to a RevenueCat paid feature — tool is a sales funnel
 5. Rule engine + LLM hybrid — works for everyone, enhanced with Gemini when available
-6. Three real API bugs found — genuine product feedback
+6. Three real API discoveries — genuine product feedback
 
 **What I'd do differently:** Less code, more content. Start with the blog, not the architecture.
