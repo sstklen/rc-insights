@@ -2,9 +2,11 @@
 
 ## Strategy Overview
 
-**Goal**: Drive awareness and adoption of RevenueCat's Charts API among AI agent developers and indie app founders.
+**Goal**: Drive awareness and adoption of RevenueCat's Charts API — and through it, RevenueCat's paid features (Experiments, Paywalls, Targeting, Web Billing).
 
-**Core message**: "One command. Your subscription health diagnosis in 30 seconds."
+**Core message**: "A $5,000 subscription consultant, in one API call. Free."
+
+**Underlying commercial logic**: Every recommendation rc-insights generates points the developer toward a specific RevenueCat paid feature. The tool is a personalized sales funnel — "your data says X, use RevenueCat's Y feature to fix it."
 
 **Budget**: $100
 
