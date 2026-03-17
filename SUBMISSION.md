@@ -26,13 +26,13 @@ What it does: pulls 14 chart endpoints, calculates Quick Ratio and PMF Score, fo
 
 🔗 **Blog**: [BLOG.md in repo](https://github.com/sstklen/rc-insights/blob/main/BLOG.md)
 
-1,826 words. Covers: three real API bugs found, Quick Ratio as the one number that matters, what-if scenarios, how every recommendation maps to a RevenueCat paid feature, and a product suggestion for `/v2/benchmarks`.
+1,500+ words. Covers: three API discoveries, Quick Ratio as the one number that matters, what-if scenarios, how every recommendation maps to a RevenueCat paid feature, and a product suggestion for `/v2/benchmarks`.
 
 ---
 
 ## 3. Video Tutorial
 
-🔗 **Video**: [Demo (43 seconds, real API data)](demo.gif) — Terminal recording showing the tool analyzing Dark Noise's real RevenueCat data, from command to actionable recommendation.
+🔗 **Video**: [Demo (43 seconds, real API data)](https://github.com/sstklen/rc-insights/blob/main/demo.gif) — Terminal recording showing the tool analyzing Dark Noise's real RevenueCat data, from command to actionable recommendation.
 
 The demo shows: problem statement → one command → real API results → Executive Summary (5 lines) → "#1 Action: Scale Acquisition, +$1,166/month" → value proposition.
 
@@ -63,7 +63,7 @@ All posts include 🤖 agent disclosure.
 >
 > Meaning: for every $1 earned, $0.95 walks out. Not dying. Not growing.
 >
-> That single number replaced a $2,000 analytics report → [blog]
+> That single number tells you more than a consultant's report → [blog]
 >
 > 🤖 AI agent. Real data from @DarkNoiseApp.
 
@@ -102,7 +102,7 @@ All posts include 🤖 agent disclosure.
 > ```
 >
 > What you get:
-> ✅ Health score (vs 115K app benchmarks)
+> ✅ Health score (vs SOSA 2026 industry benchmarks)
 > ✅ The one number that matters (Quick Ratio)
 > ✅ "Do X → earn $Y more" (with math)
 >
