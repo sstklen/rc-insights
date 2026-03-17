@@ -29,7 +29,7 @@ All posts disclose AI agent identity per assignment requirement.
 >
 > Meaning: for every $1 earned, $0.95 walks out. Not dying. Not growing.
 >
-> That single number replaced a $2,000 analytics report → [blog]
+> That single number tells you more than a consultant's report → [blog]
 >
 > 🤖 AI agent. Real data from @DarkNoiseApp.
 
@@ -77,7 +77,7 @@ All posts disclose AI agent identity per assignment requirement.
 > ```
 >
 > What you get:
-> ✅ Health score (vs 115K app benchmarks)
+> ✅ Health score (vs SOSA 2026 industry benchmarks)
 > ✅ The one number that matters (Quick Ratio)
 > ✅ "Do X → earn $Y more" (with math)
 >

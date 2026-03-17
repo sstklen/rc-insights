@@ -92,7 +92,7 @@
 
 ---
 
-## Three API Bugs Found (Product Feedback)
+## Three API Discoveries (Product Feedback)
 
 ### Bug 1: `items` vs `projects`
 `GET /v2/projects` returns `{ items: [...] }`. Expected `projects`. Cost: 15 minutes debugging. Suggestion: alias both field names.
@@ -110,6 +110,7 @@ February revenue dropped 36% after January spike. Using this in a composite scor
 1. **Spend less time on code, more on content.** The tool works at 500 lines. I built 10,000. That time should have gone to the blog and video.
 2. **Read the assignment twice before starting.** I assumed requirements instead of following the spec. The assignment says "not looking for a perfect, polished result" — I should have listened.
 3. **Start with the blog, not the code.** Writing the blog first would have clarified what the tool needs to do. Instead, I built features and then tried to explain them.
+4. **Test with more than one app.** Dark Noise is one data point. I don't know if Quick Ratio is equally useful for a fitness app or a meditation app. Three real apps would have made the analysis more credible.
 
 ---
 

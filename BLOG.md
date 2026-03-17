@@ -30,9 +30,9 @@ Everything else — the 14-metric breakdown, the MRR forecast, the what-if scena
 
 ---
 
-## Three Real API Bugs I Found
+## Three Things I Discovered About the Charts API
 
-Building against the real API (not mock data) surfaced issues that documentation review never would.
+Building against the real API (not mock data) surfaced things that documentation review never would.
 
 ### Bug 1: `items` vs `projects`
 
@@ -113,17 +113,7 @@ But here's the strategic insight the numbers alone don't show: Dark Noise's Quic
 
 That kind of reasoning — from data to decision to strategic action — is what subscription analytics should deliver.
 
-Here's what's interesting: every recommendation maps directly to a RevenueCat feature:
-
-| What the data says | What to do | RevenueCat feature |
-|-------------------|-----------|-------------------|
-| Churn too high | A/B test a win-back offer | **Experiments** |
-| Trial conversion below median | Test a different paywall design | **Paywalls** |
-| Annual plans retain better | Show annual-first to price-sensitive users | **Targeting** |
-| Japan users have highest LTV | Localized pricing for Japan | **Targeting** |
-| Web users can't pay | Enable web subscriptions | **Web Billing** |
-
-The Charts API doesn't just show you data. It shows you exactly which RevenueCat feature to use next. The tool becomes a personalized onboarding guide — "based on YOUR data, here's the feature that will make you the most money."
+What's interesting: each of these recommendations points toward an existing RevenueCat feature — Experiments for A/B testing offers, Paywalls for testing designs, Targeting for audience segmentation. The Charts API doesn't just show you data; it shows you which lever to pull next.
 
 ---
 
@@ -159,16 +149,6 @@ Consider the developer experience: instead of exporting CSVs and building spread
 
 ---
 
-## Where This Could Go
-
-The tool works today as a one-shot CLI. Run it, get your diagnosis, act on it. But the architecture points toward something more interesting.
-
-RevenueCat's MCP Server has 26 tools that let AI agents create offerings, update products, and manage entitlements. rc-insights already generates action plans that reference these tools. The gap between "you should create a win-back offering" and "here, I created it for you" is one API integration.
-
-The loop would be: **See** (pull metrics every 6 hours) → **Think** (detect anomalies, rank actions) → **Do** (execute via MCP) → **Verify** (check if the action worked). Every component exists today. The orchestration layer is the product.
-
-But that's a product, not a take-home assignment. For now, the tool does one thing well: it turns RevenueCat data into a decision you can act on today.
-
 ## What I'd Do Differently
 
 If I started over, I'd write less code and more words. The five-line Executive Summary is the entire product — everything else is supporting infrastructure. I'd spend the first four hours on a clean 500-line CLI that produces those five lines, then spend the remaining time writing the best Blog post I could about what I learned building it.
@@ -176,32 +156,6 @@ If I started over, I'd write less code and more words. The five-line Executive S
 The best Developer Advocate content doesn't say "look what I built." It says "here's what I learned, and you can use this too."
 
 That's the lesson I'll carry forward, whether I'm writing tools, Blog posts, or documentation: **start with the answer, then show your work.**
-
-## Architecture
-
-```
-RevenueCat Charts API v2
-        │
-        ▼
-   API Client (rate-limited, auto-retry on 429)
-        │
-        ▼
-   Health Check Orchestrator
-   ├── 14 chart endpoints (90-day monthly)
-   ├── 12-month history (for forecasting)
-   ├── Keyword & Offering segments
-   └── LLM analysis (optional)
-        │
-        ▼
-   Analysis Engines
-   ├── Quick Ratio (MRR Movement → single number)
-   ├── PMF Score (5-factor composite)
-   ├── MRR Forecast (trend × seasonality)
-   └── What-If Scenarios (3 simulations)
-        │
-        ▼
-   Executive Summary → "Do X to gain $Y"
-```
 
 ## Try It
 
