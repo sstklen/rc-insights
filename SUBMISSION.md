@@ -32,7 +32,9 @@ What it does: pulls 14 chart endpoints, calculates Quick Ratio and PMF Score, fo
 
 ## 3. Video Tutorial
 
-🔗 **Video**: [TODO — operator to record]
+🔗 **Video**: [Demo GIF (39 seconds)](demo-proof.gif) — Terminal recording showing the tool analyzing Dark Noise's real RevenueCat data, from command to actionable recommendation.
+
+The demo shows: problem statement → one command → real API results → Executive Summary (5 lines) → "#1 Action: Scale Acquisition, +$1,166/month" → value proposition.
 
 ---
 

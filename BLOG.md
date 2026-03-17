@@ -93,6 +93,24 @@ The Dashboard doesn't show Quick Ratio. rc-insights does.
 
 **Why this matters for RevenueCat**: Quick Ratio is the kind of derived metric that turns data into decisions. A developer who sees "Quick Ratio: 1.05" immediately understands their situation in a way that "MRR: $4,562, Churn: 6.7%, New MRR: $270/mo" doesn't convey.
 
+Here's how the data flows through the system:
+
+```mermaid
+graph LR
+    A[RevenueCat Charts API] -->|14 charts + overview| B[rc-insights]
+    B --> C[Quick Ratio]
+    B --> D[PMF Score]
+    B --> E[MRR Forecast]
+    B --> F[What-If Scenarios]
+    C --> G[Executive Summary]
+    D --> G
+    E --> G
+    F --> G
+    G -->|5 lines| H["Do X → earn $Y more"]
+```
+
+Hundreds of data points go in. Five lines come out. That's the product.
+
 ---
 
 ## What-If Scenarios: "What Should I Actually Do?"
