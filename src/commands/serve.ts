@@ -22,7 +22,7 @@ let serverPort = 3100;
 
 /** CORS headers — 所有回應都加上 */
 const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": process.env.CORS_ORIGIN || "http://localhost:3000",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
@@ -83,8 +83,17 @@ async function extractApiKey(req: Request, url: URL): Promise<string | null> {
     return null;
   }
 
-  // GET: 從 query string
-  return url.searchParams.get("api_key");
+  // GET: 從 Authorization header（不從 query string 取，防洩漏）
+  const authHeader = req.headers.get("authorization") || "";
+  if (authHeader.startsWith("Bearer ")) {
+    return authHeader.slice(7);
+  }
+  // 向後相容：仍接受 query string 但加 deprecation warning
+  const qsKey = url.searchParams.get("api_key");
+  if (qsKey) {
+    console.warn("⚠️ API key via query string is deprecated. Use Authorization: Bearer <key> header instead.");
+  }
+  return qsKey;
 }
 
 /**

@@ -71,7 +71,7 @@ export class RevenueCatClient {
    * 發送 HTTP 請求到 RevenueCat API
    * 含速率限制、重試邏輯、錯誤處理
    */
-  private async request<T>(path: string, params?: Record<string, string>): Promise<T> {
+  private async request<T>(path: string, params?: Record<string, string>, _retryCount = 0): Promise<T> {
     await this.rateLimit();
 
     let url = `${BASE_URL}${path}`;
@@ -97,9 +97,12 @@ export class RevenueCatClient {
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
       const waitSeconds = retryAfter ? parseInt(retryAfter, 10) : 60;
-      logger.warn(`Rate limited, retrying after ${waitSeconds} seconds...`);
+      if (_retryCount >= 3) {
+        throw new Error(`Rate limited after ${_retryCount} retries`);
+      }
+      logger.warn(`Rate limited, retrying after ${waitSeconds} seconds... (attempt ${_retryCount + 1}/3)`);
       await new Promise((resolve) => setTimeout(resolve, waitSeconds * 1000));
-      return this.request<T>(path, params);
+      return this.request<T>(path, params, _retryCount + 1);
     }
 
     // 處理其他錯誤
